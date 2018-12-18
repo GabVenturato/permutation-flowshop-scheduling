@@ -121,15 +121,27 @@ void FP_Output::reset() {
     }
 }
 
+/*!
+ * @brief Compute the Makespan.
+ * @return The Makespan.
+ */
 size_t FP_Output::computeMakespan() const {
+    // The Makespan is the end time of the last machine run on the last job
+    // scheduled.
     return machine_end_times[in.getMachines()-1];
 }
 
+/*!
+ * @brief Compute the tardiness of the schedule.
+ * @return The tardiness.
+ */
 size_t FP_Output::computeTardiness() const {
     size_t tardiness = 0;
     for (size_t i = 0; i < in.getJobs(); ++i) {
         int due = in.getDueDates(i);
+        // Compute the tardiness only if the job has a due date
         if (due != -1) {
+            // and if its end time exceeds the due date.
             if (static_cast<size_t>(due) < job_end_times[i]) {
                 tardiness += (job_end_times[i] - due) * in.getWeight(i);
             }
