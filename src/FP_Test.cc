@@ -15,6 +15,7 @@ int main(int argc, char* argv[]) {
     FP_Input in(file_name);
     cout << in << endl;
     FP_Output out(in);
+    cout << out << endl;
 
     return EXIT_SUCCESS;
 }

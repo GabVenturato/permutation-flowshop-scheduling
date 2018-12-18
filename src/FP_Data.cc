@@ -98,6 +98,57 @@ ostream& operator<<(ostream& os, const FP_Input& in) {
     return os;
 }
 
-FP_Output::FP_Output(const FP_Input& my_in) : in(my_in) {
+FP_Output::FP_Output(const FP_Input& my_in) 
+    : in(my_in), schedule(in.getJobs()), job_end_times(in.getJobs()),
+    machine_end_times(in.getMachines())
+{}
+
+FP_Output& FP_Output::operator=(const FP_Output& out) {
+    schedule = out.schedule;
+    machine_end_times = out.machine_end_times;
+    job_end_times = out.job_end_times;
+    return *this;
 }
 
+void FP_Output::reset() {
+    for (size_t i = 0; i < in.getJobs(); ++i) {
+        schedule[i] = 0;
+        job_end_times[i] = 0;
+    }
+
+    for (size_t i = 0; i < in.getMachines(); ++i) {
+        machine_end_times[i] = 0;
+    }
+}
+
+size_t FP_Output::computeMakespan() const {
+    return machine_end_times[in.getMachines()-1];
+}
+
+size_t FP_Output::computeTardiness() const {
+    size_t tardiness = 0;
+    for (size_t i = 0; i < in.getJobs(); ++i) {
+        int due = in.getDueDates(i);
+        if (due != -1) {
+            if (static_cast<size_t>(due) < job_end_times[i]) {
+                tardiness += (job_end_times[i] - due) * in.getWeight(i);
+            }
+        }
+    }
+
+    return tardiness;
+}
+
+ostream& operator<<(ostream& os, const FP_Output& out) {
+    os << "Schedule: [";
+    for (size_t i = 0; i < out.in.getJobs(); ++i) {
+        os << out.schedule[i];
+        if (i < out.in.getJobs() - 1) {
+            os << ",";
+        } else {
+            os << "]";
+        }
+    }
+    os << "\n";
+    return os;
+}
