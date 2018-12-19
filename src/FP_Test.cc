@@ -1,4 +1,5 @@
 #include "FP_Data.hh"
+#include "FP_Greedy.hh"
 #include <iostream>
 #include <cstdlib>
 
@@ -15,7 +16,13 @@ int main(int argc, char* argv[]) {
     FP_Input in(file_name);
     cout << in << endl;
     FP_Output out(in);
+
+    greedyWSolver(in, out);
+
     cout << out << endl;
+    cout << "Makespan: " << out.computeMakespan() << endl;
+    cout << "Tardiness: " << out.computeTardiness() << endl;
+    cout << "Total cost: " << out.computeTardiness() + out.computeMakespan() << endl;
 
     return EXIT_SUCCESS;
 }
