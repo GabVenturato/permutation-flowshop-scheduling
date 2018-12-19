@@ -18,14 +18,14 @@ typedef pair<size_t, size_t> pi;
 void greedyWSolver(const FP_Input& in, FP_Output& out) {
     out.reset();
 
-    // Priority queue sorted by weight in descending order.
+    // Priority queue sorted by weight in ascending order.
     vector<pi> pq;
 
     for (size_t i = 0; i < in.getJobs(); ++i) {
         pq.push_back(make_pair(in.getWeight(i) + in.getReleaseDate(i), i));
     }
 
-    // Sort it in descending order of weight.
+    // Sort it in ascending order of weight.
     sort(pq.begin(), pq.end());
 
 #ifdef NDEBUG
