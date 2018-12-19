@@ -4,5 +4,6 @@
 
 int random(int min, int max);
 void greedyWSolver(const FP_Input& in, FP_Output& out);
+void greedyRandomWSolver(const FP_Input& in, FP_Output& out);
 
 #endif

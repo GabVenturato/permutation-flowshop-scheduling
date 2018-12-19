@@ -4,20 +4,37 @@
 #include <cstdlib>
 
 int main(int argc, char* argv[]) {
-    string file_name;
+    string file_name, solver;
 
-    if (argc == 2) {
-        file_name = argv[1];
-    } else if (argc == 1) {
+    if (argc == 1) {
         cout << "Input file name: ";
         cin >> file_name;
+    } else if (argc == 2) {
+        file_name = argv[1];
+        solver = "wgreedy";
+    } else if (argc == 3) {
+        file_name = argv[1];
+        solver = argv[2];
+    } else {
+        cerr << "Usage: " << argv[0] << "<input file> [solver in {wgreedy, rwgreedy}]"
+            << endl;
+        return EXIT_FAILURE;
     }
 
     FP_Input in(file_name);
+#ifdef NDEBUG
     cout << in << endl;
+#endif
     FP_Output out(in);
 
-    greedyWSolver(in, out);
+    if (solver == "wgreedy") {
+        greedyWSolver(in, out);
+    } else if (solver == "rwgreedy") {
+        greedyRandomWSolver(in, out);
+    } else {
+        cerr << "Unknown solver " << solver << endl;
+        return EXIT_FAILURE;
+    }
 
     cout << out << endl;
     cout << "Makespan: " << out.computeMakespan() << endl;
