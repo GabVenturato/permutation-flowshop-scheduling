@@ -112,11 +112,10 @@ void greedyRandomWSolver(const FP_Input& in, FP_Output& out) {
     // Sort it in ascending order of weight.
     sort(pq.begin(), pq.end());
 
-    // TODO: controllare che gli swap abbiamo la corretta probabilità
     // If there are elements with equal weight we try to swap them
     size_t equal = 0;
     for (size_t i = 0; i < pq.size() - 1; ++i) {
-        equal = 0;
+        equal = 1;
         for (size_t j = i + 1; j < pq.size(); ++j) {
             if (pq[i].first == pq[j].first) {
                 DEBUG_MSG("Job " << pq[i].second << " and " << pq[j].second <<
