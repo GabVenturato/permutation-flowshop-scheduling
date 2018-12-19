@@ -28,7 +28,7 @@ void greedyWSolver(const FP_Input& in, FP_Output& out) {
     // Sort it in descending order of weight.
     sort(pq.begin(), pq.end());
 
-#ifdef DEBUG
+#ifdef NDEBUG
     for (size_t i = 0; i < in.getJobs(); ++i) {
         cout << "(" << pq[i].first << "," << pq[i].second << ")" << endl;
     }
