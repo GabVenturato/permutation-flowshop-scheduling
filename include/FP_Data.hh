@@ -3,7 +3,6 @@
 #include <iostream>
 #include <cstdlib>
 #include <vector>
-#include <queue>
 #include <algorithm>
 
 using namespace std;
@@ -33,8 +32,11 @@ public:
     FP_Output& operator=(const FP_Output& out);
     void reset();
     void addJob(size_t j) { schedule.push_back(j); }
-    void addMTime(size_t t, size_t m) { machine_end_times[m] += t; }
+    void addMTime(size_t t, size_t m) { machine_end_times[m] = t; }
     void addJTime(size_t t, size_t j) { job_end_times[j] = t; }
+    size_t getJob(size_t j) const { return schedule[j]; }
+    size_t getMTime(size_t m) const { return machine_end_times[m]; }
+    size_t getJTime(size_t j) const { return job_end_times[j]; }
     size_t computeMakespan() const;
     size_t computeTardiness() const;
 private:

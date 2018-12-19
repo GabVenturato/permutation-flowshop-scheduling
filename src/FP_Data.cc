@@ -99,7 +99,7 @@ ostream& operator<<(ostream& os, const FP_Input& in) {
 }
 
 FP_Output::FP_Output(const FP_Input& my_in) 
-    : in(my_in), schedule(in.getJobs()), job_end_times(in.getJobs()),
+    : in(my_in), job_end_times(in.getJobs()),
     machine_end_times(in.getMachines())
 {}
 
@@ -112,7 +112,6 @@ FP_Output& FP_Output::operator=(const FP_Output& out) {
 
 void FP_Output::reset() {
     for (size_t i = 0; i < in.getJobs(); ++i) {
-        schedule[i] = 0;
         job_end_times[i] = 0;
     }
 
