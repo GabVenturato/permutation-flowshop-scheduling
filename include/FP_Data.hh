@@ -5,6 +5,11 @@
 #include <vector>
 #include <algorithm>
 
+#ifdef NDEBUG
+#define DEBUG_MSG(str) do { cout << str; } while (false)
+#else
+#define DEBUG_MSG(str) do { } while (false)
+#endif
 using namespace std;
 
 class FP_Input {
@@ -32,6 +37,7 @@ public:
     FP_Output& operator=(const FP_Output& out);
     void reset();
     void addJob(size_t j) { schedule.push_back(j); }
+    void runJob(size_t j);
     void addMTime(size_t t, size_t m) { machine_end_times[m] = t; }
     void addJTime(size_t t, size_t j) { job_end_times[j] = t; }
     size_t getJob(size_t j) const { return schedule[j]; }

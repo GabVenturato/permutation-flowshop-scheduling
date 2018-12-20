@@ -121,6 +121,62 @@ void FP_Output::reset() {
 }
 
 /*!
+ * @brief Run a specific job on all machines and update its completion
+ * time and the completion time of each machine.
+ * @param[in] job The job to run.
+ */
+void FP_Output::runJob(size_t job) {
+    // If the release date is <= than the end time of the machine 0
+    // then the job will start from the previous end time of the machine 0
+    if (in.getReleaseDate(job) <= getMTime(0)) {
+        size_t old_time = getMTime(0);
+
+        DEBUG_MSG("Job " << job << " starting on machine 0 at " 
+                << old_time);
+
+        size_t new_time = old_time + in.getDuration(job, 0);
+        addMTime(new_time, 0);
+    } else {
+        // otherwise it'll start from the value of the release date
+        DEBUG_MSG("Job " << job << " starting on machine 0 at " 
+                << in.getReleaseDate(job));
+
+        size_t new_time = in.getReleaseDate(job) + 
+            in.getDuration(job, 0);
+        addMTime(new_time, 0);
+    }
+
+    DEBUG_MSG(" and ending on machine 0 at " << out.getMTime(0) << endl);
+
+    for (size_t i = 1; i < in.getMachines(); ++i) {
+        if (getMTime(i) > getMTime(i-1)) {
+            // Start from the old time of machine i
+            size_t old_time = getMTime(i);
+
+            DEBUG_MSG("Job " << job << " starting on machine " << 
+                    i << " at " << old_time);
+
+            size_t new_time = old_time + in.getDuration(job, i);
+            addMTime(new_time, i);
+        } else {
+            // Start from the old time of the previous machine
+            size_t old_time = getMTime(i-1);
+
+            DEBUG_MSG("Job " << job << " starting on machine " << 
+                    i << " at " << old_time);
+
+            size_t new_time = old_time + in.getDuration(job, i);
+            addMTime(new_time, i);
+        }
+
+        DEBUG_MSG(" and ending on machine " << i << " at " 
+                << out.getMTime(i) << endl);
+    }
+
+    addJTime(getMTime(in.getMachines()-1), job);
+}
+
+/*!
  * @brief Compute the Makespan.
  * @return The Makespan.
  */
