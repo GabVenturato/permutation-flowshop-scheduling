@@ -146,7 +146,7 @@ void FP_Output::runJob(size_t job) {
         addMTime(new_time, 0);
     }
 
-    DEBUG_MSG(" and ending on machine 0 at " << out.getMTime(0) << endl);
+    DEBUG_MSG(" and ending on machine 0 at " << getMTime(0) << endl);
 
     for (size_t i = 1; i < in.getMachines(); ++i) {
         if (getMTime(i) > getMTime(i-1)) {
@@ -170,7 +170,7 @@ void FP_Output::runJob(size_t job) {
         }
 
         DEBUG_MSG(" and ending on machine " << i << " at " 
-                << out.getMTime(i) << endl);
+                << getMTime(i) << endl);
     }
 
     addJTime(getMTime(in.getMachines()-1), job);
