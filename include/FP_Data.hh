@@ -6,10 +6,11 @@
 #include <algorithm>
 
 #ifdef NDEBUG
-#define DEBUG_MSG(str) do { cout << str; } while (false)
-#else
 #define DEBUG_MSG(str) do { } while (false)
+#else
+#define DEBUG_MSG(str) do { cout << str; } while (false)
 #endif
+
 using namespace std;
 
 class FP_Input {
