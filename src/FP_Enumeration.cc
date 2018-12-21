@@ -37,7 +37,7 @@ void EnumerationFPOpt::First() {
 }
 
 /*!
- * @brief Generate only the permutations which have in it's first position
+ * @brief Generate only the permutations which have in its first position
  * a job available at time 0.
  * @return false if there are no more permutations, true otherwise.
  */
@@ -48,7 +48,7 @@ bool EnumerationFPOpt::Next() {
     } else if (!next_permutation(out.getSchedule().begin()+1,
                 out.getSchedule().end())) {
         // If there are no more permutations with that particular job as the
-        // starting job, delete the current one
+        // starting job, delete the current starting job
         starting_jobs.erase(starting_jobs.begin());
         
         out.getSchedule().clear();
