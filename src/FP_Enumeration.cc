@@ -1,4 +1,5 @@
 #include "FP_Enumeration.hh"
+#include <cassert>
 #include <algorithm>
 #include <random>
 
@@ -13,6 +14,9 @@ void EnumerationFPOpt::First() {
             starting_jobs.push_back(j);
         }
     }
+
+    // Assume there's at least one job available at time 0.
+    assert(starting_jobs.size());
 
     random_device rd;
     mt19937 g(rd());
@@ -67,6 +71,8 @@ bool EnumerationFPOpt::Next() {
 }
 
 bool EnumerationFPOpt::Feasible() {
+    // Redundant since we generate permutations that start with a job
+    // available at time 0.
     return !in.getReleaseDate(out.getJob(0));
 }
 
