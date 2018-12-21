@@ -23,7 +23,7 @@ int main(int argc, char* argv[]) {
     }
 
     FP_Input in(file_name);
-#ifdef NDEBUG
+#ifndef NDEBUG
     cout << in << endl;
 #endif
     FP_Output out(in);

@@ -1,4 +1,4 @@
-CXXFLAGS = -I$(INCLUDE_DIR) -pedantic -Wall -Wextra -Werror -O3 -std=c++11 -march=native #-DNDEBUG
+CXXFLAGS = -I$(INCLUDE_DIR) -pedantic -Wall -Wextra -Werror -O3 -std=c++11 -march=native -DNDEBUG
 INCLUDE_DIR = ../include
 
 FP_Test: FP_Test.o FP_Data.o FP_Greedy.o FP_Enumeration.o Random.o

@@ -22,7 +22,7 @@ void greedyWSolver(const FP_Input& in, FP_Output& out) {
     // Sort it in ascending order of weight.
     sort(pq.begin(), pq.end());
 
-#ifdef NDEBUG
+#ifndef NDEBUG
     for (size_t i = 0; i < in.getJobs(); ++i) {
         cout << "(" << pq[i].first << "," << pq[i].second << ")" << endl;
     }
@@ -75,7 +75,7 @@ void greedyRandomWSolver(const FP_Input& in, FP_Output& out) {
         }
     }
 
-#ifdef NDEBUG
+#ifndef NDEBUG
     for (size_t i = 0; i < in.getJobs(); ++i) {
         cout << "(" << pq[i].first << "," << pq[i].second << ")" << endl;
     }
