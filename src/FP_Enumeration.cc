@@ -1,8 +1,29 @@
 #include "FP_Enumeration.hh"
+#include <algorithm>
+#include <random>
 
+/*!
+ * @brief Generate first permutation by choosing the starting job such
+ * that it's available at time 0.
+ */
 void EnumerationFPOpt::First() {
-    for (size_t i = 0; i < in.getJobs(); ++i) {
-        out.addJob(i);
+    // Store the jobs available at time 0
+    for (size_t j = 0; j < in.getJobs(); j++) {
+        if (in.getReleaseDate(j) == 0) {
+            starting_jobs.push_back(j);
+        }
+    }
+
+    random_device rd;
+    mt19937 g(rd());
+    shuffle(starting_jobs.begin(), starting_jobs.end(), g);
+    // Randomly select the first job
+    out.addJob(starting_jobs[0]);
+
+    for (size_t j = 0; j < in.getJobs(); ++j) {
+        if (j != starting_jobs[0]) {
+            out.addJob(j);
+        }
     }
 
 #ifdef NDEBUG
@@ -15,10 +36,34 @@ void EnumerationFPOpt::First() {
 
 }
 
+/*!
+ * @brief Generate only the permutations which have in it's first position
+ * a job available at time 0.
+ * @return false if there are no more permutations, true otherwise.
+ */
 bool EnumerationFPOpt::Next() {
-    // TODO: generare solo le permutazioni che hanno in prima posizione un
-    // job disponibile al tempo 0.
-    return next_permutation(out.getSchedule().begin(), out.getSchedule().end());
+    // If there are no more jobs available at time 0, we are done.
+    if (starting_jobs.size() == 0) {
+        return false;
+    } else if (!next_permutation(out.getSchedule().begin()+1,
+                out.getSchedule().end())) {
+        // If there are no more permutations with that particular job as the
+        // starting job, delete the current one
+        starting_jobs.erase(starting_jobs.begin());
+        
+        out.getSchedule().clear();
+        // extract a new job to be the 'first'
+        out.addJob(starting_jobs[0]);
+
+        for (size_t j = 0; j < in.getJobs(); ++j) {
+            if (j != starting_jobs[0]) {
+                out.addJob(j);
+            }
+        }
+
+        next_permutation(out.getSchedule().begin()+1, out.getSchedule().end());
+    }
+    return true;
 }
 
 bool EnumerationFPOpt::Feasible() {

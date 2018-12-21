@@ -10,5 +10,6 @@ protected:
     bool Feasible();
     void computeEndTimes();
     size_t Cost();
+    vector<size_t> starting_jobs;
 };
 
