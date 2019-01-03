@@ -1,0 +1,14 @@
+% Optimum: 289 (makespan 229 + tardiness 15*4)
+Jobs = 3;
+Machines = 2;
+
+ProcessingTimes = [|49, 45
+                   |26, 57
+                   |95, 59
+                   |];
+
+ReleaseDates = [120, 0, 30];
+
+DueDates = [214, 98, -1];
+
+Weights = [4, 1, 3];
