@@ -17,11 +17,11 @@ array[1..Jobs] of var 1..Jobs: JobsOrder;
 var int: Cost;
 
 % CONSTRAINTS
+constraint alldifferent(JobsOrder);
+
 % first job should start as soon as possible
 constraint
    Execution[ JobsOrder[1], 1 ] = min(ReleaseDates);
-
-constraint alldifferent(JobsOrder);
 
 % i-th operation must start after (i-1)-th operation
 constraint
