@@ -8,7 +8,10 @@ array[1..Jobs] of int: ReleaseDates;
 array[1..Jobs] of int: DueDates;
 array[1..Jobs] of int: Weights;
 
-int: MaxExecTime = max(ReleaseDates) + sum (j in 1..Jobs, i  in 1..Machines) (ProcessingTimes[j,i]); % NOT SURE
+% To limit Execution time domain:
+% - at least 0 value is needed to start
+% - max value can be the sum of all jobs executed one per time, plus max release time
+int: MaxExecTime = max(ReleaseDates) + sum (j in 1..Jobs, i  in 1..Machines) (ProcessingTimes[j,i]);
 
 % VARIABLES
 array[1..Jobs, 1..Machines] of var 0..MaxExecTime: Execution;
@@ -17,11 +20,11 @@ array[1..Jobs] of var 1..Jobs: JobsOrder;
 var int: Cost;
 
 % CONSTRAINTS
+constraint alldifferent(JobsOrder);
+
 % first job should start as soon as possible
 constraint
    Execution[ JobsOrder[1], 1 ] = min(ReleaseDates);
-
-constraint alldifferent(JobsOrder);
 
 % i-th operation must start after (i-1)-th operation
 constraint
@@ -57,7 +60,9 @@ constraint
         );
 
 
-solve minimize Cost;
+% solve minimize Cost;
+solve :: int_search( [ Execution[j,m] | j in 1..Jobs, m in 1..Machines], first_fail, indomain_min, complete )
+    minimize Cost;
 
 % OUTPUT
 output
