@@ -41,7 +41,7 @@ public:
     void runJob(size_t j);
     void addMTime(size_t t, size_t m) { machine_end_times[m] = t; }
     void addJTime(size_t t, size_t j) { job_end_times[j] = t; }
-    size_t getJob(size_t j) const { return schedule[j]; }
+    size_t operator[](size_t j) const { return schedule[j]; }
     vector<size_t>& getSchedule() { return schedule; }
     size_t getMTime(size_t m) const { return machine_end_times[m]; }
     size_t getJTime(size_t j) const { return job_end_times[j]; }

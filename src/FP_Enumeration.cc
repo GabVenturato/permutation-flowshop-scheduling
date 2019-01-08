@@ -13,7 +13,7 @@ void EnumerationFPOpt::First() {
 #ifndef NDEBUG
     cout << "\nFirst solution: ";
     for (size_t i = 0; i < in.getJobs(); ++i) {
-        cout << out.getJob(i) << " ";
+        cout << out[i] << " ";
     }
     cout << endl;
 #endif
@@ -43,13 +43,13 @@ void EnumerationFPOpt::computeEndTimes() {
 #ifndef NDEBUG
     cout << "\nTesting solution: ";
     for (size_t i = 0; i < in.getJobs(); ++i) {
-        cout << out.getJob(i) << " ";
+        cout << out[i] << " ";
     }
     cout << endl;
 #endif
 
     for (size_t i = 0; i < in.getJobs(); ++i) {
-        size_t j = out.getJob(i);
+        size_t j = out[i];
         out.runJob(j);
     }
 }
