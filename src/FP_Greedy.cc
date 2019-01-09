@@ -1,5 +1,6 @@
 #include "FP_Greedy.hh"
 #include "Random.hh"
+#include <ctgmath>
 
 // Pair of (weight, job_index)
 typedef pair<size_t, size_t> pi;
@@ -12,15 +13,18 @@ typedef pair<size_t, size_t> pi;
 void greedyWSolver(const FP_Input& in, FP_Output& out) {
     out.reset();
 
-    // Priority queue sorted by weight in ascending order.
+    // Priority queue sorted by weight in descending order.
     vector<pi> pq;
 
     for (size_t i = 0; i < in.getJobs(); ++i) {
-        pq.push_back(make_pair(in.getWeight(i) + in.getReleaseDate(i), i));
+        //pq.push_back(make_pair(in.getReleaseDate(i) / in.getWeight(i), i));
+        //pq.push_back(make_pair(in.getTotalDuration(i) * in.getWeight(i), i));
+        pq.push_back(make_pair(abs(in.getDueDates(i)) * in.getWeight(i), i));
     }
 
-    // Sort it in ascending order of weight.
-    sort(pq.begin(), pq.end());
+    // Sort it in descending order of weight.
+    //sort(pq.begin(), pq.end());
+    sort(pq.begin(), pq.end(), greater<pi>());
 
 #ifndef NDEBUG
     for (size_t i = 0; i < in.getJobs(); ++i) {
@@ -47,15 +51,18 @@ void greedyWSolver(const FP_Input& in, FP_Output& out) {
 void greedyRandomWSolver(const FP_Input& in, FP_Output& out) {
     out.reset();
 
-    // Priority queue sorted by weight in ascending order.
+    // Priority queue sorted by weight in descending order.
     vector<pi> pq;
 
     for (size_t i = 0; i < in.getJobs(); ++i) {
-        pq.push_back(make_pair(in.getWeight(i) + in.getReleaseDate(i), i));
+        //pq.push_back(make_pair(in.getReleaseDate(i) / in.getWeight(i), i));
+        //pq.push_back(make_pair(in.getTotalDuration(i) * in.getWeight(i), i));
+        pq.push_back(make_pair(abs(in.getDueDates(i)) * in.getWeight(i), i));
     }
 
-    // Sort it in ascending order of weight.
-    sort(pq.begin(), pq.end());
+    // Sort it in descending order of weight.
+    //sort(pq.begin(), pq.end());
+    sort(pq.begin(), pq.end(), greater<pi>());
 
     // If there are elements with equal weight we try to swap them
     size_t equal = 0;

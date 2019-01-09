@@ -23,6 +23,7 @@ public:
     size_t getReleaseDate(size_t job) const { return release_dates[job]; }
     int getDueDates(size_t job) const { return due_dates[job]; }
     size_t getWeight(size_t job) const { return weights[job]; }
+    size_t getTotalDuration(size_t job) const;
 private:
     size_t jobs, machines;
     vector<vector<size_t>> durations;
