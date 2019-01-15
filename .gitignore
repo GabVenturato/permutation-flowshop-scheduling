@@ -1,2 +1,4 @@
 *.o
+*.gch
+*.pch
 src/FP_Test
