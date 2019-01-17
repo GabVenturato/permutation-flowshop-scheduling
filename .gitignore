@@ -1,4 +1,5 @@
 *.o
 *.gch
 *.pch
-src/FP_Test
+EnumGreedy/src/FP_Test
+.vscode
