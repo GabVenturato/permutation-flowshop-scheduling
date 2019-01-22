@@ -2,3 +2,4 @@
 *.gch
 *.pch
 src/FP_Test
+.vscode
