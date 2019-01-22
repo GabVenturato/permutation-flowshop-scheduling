@@ -1,0 +1,25 @@
+Tue 22 Jan 17:44:06 CET 2019
+Timeout: 30000
+%%mzn-stat objective=499
+%%mzn-stat objectiveBound=1e+308
+%%mzn-stat nodes=0
+%%mzn-stat time=2.2547
+EXECUTION TIMES:
+    0(   49)	   49(   94)	   94(  158)
+   49(   75)	   94(  151)	  177(  267)
+  192(  287)	  287(  346)	  346(  413)
+   75(   86)	  168(  192)	  267(  280)
+  107(  192)	  192(  279)	  280(  346)
+
+
+JOBS ORDER:	[1, 2, 4, 5, 3]
+
+COST:	499
+----------
+==========
+%%mzn-stat objective=499
+%%mzn-stat objectiveBound=499
+%%mzn-stat nodes=96
+%%mzn-stat openNodes=-1
+%%mzn-stat time=2.2547
+
