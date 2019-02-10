@@ -51,7 +51,7 @@ for infile in ../../Instances/*; do
     echo "Timeout: "$TIME >> $outfile
     case $SOLVER in
         Gecode)
-            minizinc -s --fzn-flags "-time $TIME"\
+            minizinc -s --fzn-flags "-time $TIME -p 0"\
                 --solver $SOLVER $MODEL $infile >> $outfile &
             wait_with_spinner $!
         ;;
