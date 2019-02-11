@@ -4,26 +4,30 @@
 
 #include "FP_Data.hh"
 
-class FP_State
-{  
+class FP_State {
   friend ostream& operator<<(ostream& os, const FP_State& st);
   friend bool operator==(const FP_State& st1, const FP_State& st2);
-public:
-  FP_State(const FP_Input &in);
+
+ public:
+  FP_State(const FP_Input& in);
   FP_State& operator=(const FP_State& s);
-protected:
-  const FP_Input & in;  
+  size_t operator[](unsigned i) const { return schedule[i]; }
+  size_t& operator[](unsigned i) { return schedule[i]; }
+
+ protected:
+  const FP_Input& in;
+  vector<size_t> schedule;
 };
 
-class FP_Move
-{
-  friend bool operator==(const FP_Move& m1, const FP_Move& m2);
-  friend bool operator!=(const FP_Move& m1, const FP_Move& m2);
-  friend bool operator<(const FP_Move& m1, const FP_Move& m2);
-  friend ostream& operator<<(ostream& os, const FP_Move& c);
-  friend istream& operator>>(istream& is, FP_Move& c);
+class SwapJobs {
+  friend bool operator==(const SwapJobs& m1, const SwapJobs& m2);
+  friend bool operator!=(const SwapJobs& m1, const SwapJobs& m2);
+  friend bool operator<(const SwapJobs& m1, const SwapJobs& m2);
+  friend ostream& operator<<(ostream& os, const SwapJobs& c);
+  friend istream& operator>>(istream& is, SwapJobs& c);
+
  public:
-  FP_Move();
+  SwapJobs(unsigned i = 0, unsigned j = 0);
+  unsigned p1, p2;
 };
 #endif
-

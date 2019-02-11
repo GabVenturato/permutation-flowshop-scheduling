@@ -1,128 +1,120 @@
 // File FP_Helpers.cc
 #include "FP_Helpers.hh"
 
-int FP_CostComponent1::ComputeCost(const FP_State& st) const
-{
-  unsigned cost = 0;
-  // Insert the code that computes the cost for component 1 
-  // of state st
-	throw logic_error("FP_CostComponent1::ComputeCost not implemented yet");	
-  return cost;
-}
-          
-void FP_CostComponent1::PrintViolations(const FP_State& st, ostream& os) const
-{
-  // Insert the code that prints the violations of component 1 
-  // of state st
-	throw logic_error("FP_CostComponent1::PrintViolations not implemented yet");	
+/***************************************************************************
+ * State Manager
+ ***************************************************************************/
+
+void FP_StateManager::RandomState(FP_State& st) {
+  for (unsigned i = 0; i < in.getJobs(); i++) {
+    unsigned j = Random::Uniform<unsigned>(i, in.getJobs() - 1);
+    swap(st[i], st[j]);
+  }
 }
 
-int FP_CostComponent2::ComputeCost(const FP_State& st) const
-{ 
+/*****************************************************************************
+ * Output Manager
+ *****************************************************************************/
+
+void FP_OutputManager::InputState(FP_State& st, const FP_Output& out) const {
+  for (unsigned i = 0; i < in.getJobs(); i++) {
+    st[i] = out[i];
+  }
+}
+
+void FP_OutputManager::OutputState(const FP_State& st, FP_Output& out) const {
+  for (unsigned i = 0; i < in.getJobs(); i++) {
+    out[i] = st[i];
+  }
+}
+
+/***************************************************************************
+ * Cost Components
+ ***************************************************************************/
+
+int Makespan::ComputeCost(const FP_State& st) const {
+  unsigned cost = 0;
+  // Insert the code that computes the cost for component 1
+  // of state st
+  throw logic_error("FP_Makespan::ComputeCost not implemented yet");
+  return cost;
+}
+
+void Makespan::PrintViolations(const FP_State& st, ostream& os) const {
+  // Insert the code that prints the violations of component 1
+  // of state st
+  throw logic_error("FP_Makespan::PrintViolations not implemented yet");
+}
+
+int Tardiness::ComputeCost(const FP_State& st) const {
   unsigned cost = 0;
   // Insert the code that computes the cost for component 2
   // of state st
-	throw logic_error("FP_CostComponent2::ComputeCost not implemented yet");	
+  throw logic_error("Tardiness::ComputeCost not implemented yet");
   return cost;
 }
- 
-void FP_CostComponent2::PrintViolations(const FP_State& st, ostream& os) const
-{
-  // Insert the code that prints the violations of component 1 
+
+void Tardiness::PrintViolations(const FP_State& st, ostream& os) const {
+  // Insert the code that prints the violations of component 1
   // of state st
-	throw logic_error("FP_CostComponent2::PrintViolations not implemented yet");	
-}
-
-// constructor
-FP_StateManager::FP_StateManager(const FP_Input & pin) 
-  : StateManager<FP_Input,FP_State>(pin, "XYZStateManager")  {} 
-
-// initial state builder (random rooms)
-void FP_StateManager::RandomState(FP_State& st) 
-{
-// Insert the code that creates a random state in object st
-	throw logic_error("FP_StateManager::RandomState not implemented yet");	
-} 
-
-bool FP_StateManager::CheckConsistency(const FP_State& st) const
-{
-  // Insert the code that checks if state in object st is consistent
-  // (for debugging purposes)
-	throw logic_error("FP_StateManager::CheckConsistency not implemented yet");	
-  return true;
+  throw logic_error("Tardiness::PrintViolations not implemented yet");
 }
 
 /*****************************************************************************
- * Output Manager Methods
- *****************************************************************************/
-
-void FP_OutputManager::InputState(FP_State& st, const FP_Output& XYZ) const 
-{
-  // Insert the code that "translates" an output object to a state object
-	throw logic_error("FP_OutputManager::InputState not implemented yet");	
-}
-
-void FP_OutputManager::OutputState(const FP_State& st, FP_Output& XYZ) const 
-{
-  // Insert the code that "translates" a state object to an output object
-	throw logic_error("FP_OutputManager::OutputState not implemented yet");	
-}
-
-
-/*****************************************************************************
- * FP_Move Neighborhood Explorer Methods
+ * SwapJobs Neighborhood Explorer
  *****************************************************************************/
 
 // initial move builder
-void FP_MoveNeighborhoodExplorer::RandomMove(const FP_State& st, FP_Move& mv) const
-{
-  // insert the code that writes a random move on mv in state st
-	throw logic_error("FP_MoveNeighborhoodExplorer::RandomMove not implemented yet");	
-} 
+void SwapJobsNeighborhoodExplorer::RandomMove(const FP_State& st, SwapJobs& mv) const {
+  mv.p1 = Random::Uniform<unsigned>(0, in.getJobs() - 1);
+  unsigned a[2];
+  a[0] = Random::Uniform<unsigned>(0, mv.p1 - 1);
+  a[1] = Random::Uniform<unsigned>(mv.p1 + 1, in.getJobs() - 1);
+  unsigned c = Random::Uniform<unsigned>(0, 1);
+  mv.p2 = a[c];
+
+  // keep always p1 < p2
+  if (mv.p1 > mv.p2) swap(mv.p1, mv.p2);
+}
 
 // check move feasibility
-bool FP_MoveNeighborhoodExplorer::FeasibleMove(const FP_State& st, const FP_Move& mv) const
-{
-  // Insert the code that check is move mv is legal in state st 
-  // (return true if legal, false otherwise)
-	throw logic_error("FP_MoveNeighborhoodExplorer::FeasibleMove not implemented yet");	
-  return true;
-} 
-
-// update the state according to the move 
-void FP_MoveNeighborhoodExplorer::MakeMove(FP_State& st, const FP_Move& mv) const
-{
-  // Insert the code that modify the state st based on the application of move mv
-	throw logic_error("FP_MoveNeighborhoodExplorer::MakeMove not implemented yet");	
-}  
-
-void FP_MoveNeighborhoodExplorer::FirstMove(const FP_State& st, FP_Move& mv) const
-{
-  // Insert the code the generate the first move in the neighborhood and store it in mv
-	throw logic_error("FP_MoveNeighborhoodExplorer::FirstMove not implemented yet");	
+bool SwapJobsNeighborhoodExplorer::FeasibleMove(const FP_State& st, const SwapJobs& mv) const {
+  return mv.p1 < mv.p2;
 }
 
-bool FP_MoveNeighborhoodExplorer::NextMove(const FP_State& st, FP_Move& mv) const
-{
-  // Insert the code that generate the move that follows mv in the neighborhood, and writes
-  // it back in mv. Return false if mv is already the last move. 
-	throw logic_error("FP_MoveNeighborhoodExplorer::NextMove not implemented yet");	
-  return true;
+// update the state according to the move
+void SwapJobsNeighborhoodExplorer::MakeMove(FP_State& st, const SwapJobs& mv) const {
+  swap(st[mv.p1], st[mv.p2]);
 }
 
-int FP_MoveDeltaCostComponent1::ComputeDeltaCost(const FP_State& st, const FP_Move& mv) const
-{
+void SwapJobsNeighborhoodExplorer::FirstMove(const FP_State& st, SwapJobs& mv) const {
+  mv.p1 = 0;
+  mv.p2 = 1;
+}
+
+bool SwapJobsNeighborhoodExplorer::NextMove(const FP_State& st, SwapJobs& mv) const {
+  if (mv.p2 < in.getJobs() - 1) {
+    mv.p2++;
+    return true;
+  } else if (mv.p1 < in.getJobs() - 2) {
+    mv.p1++;
+    mv.p2 = mv.p1 + 1;
+    return true;
+  } else {
+    return false;
+  }
+}
+
+int SwapJobsDeltaMakespan::ComputeDeltaCost(const FP_State& st, const SwapJobs& mv) const {
   int cost = 0;
   // Insert the code that computes the delta cost of component 1 for move mv in state st
-	throw logic_error("FP_MoveDeltaCostComponent1::ComputeDeltaCost not implemented yet");	
-  return cost;
-}
-          
-int FP_MoveDeltaCostComponent2::ComputeDeltaCost(const FP_State& st, const FP_Move& mv) const
-{
-  int cost = 0;
-  // Insert the code that computes the delta cost of component 1 for move mv in state st
-	throw logic_error("FP_MoveDeltaCostComponent2::ComputeDeltaCost not implemented yet");	
+  throw logic_error("SwapJobsDeltaMakespan::ComputeDeltaCost not implemented yet");
   return cost;
 }
 
+int SwapJobsDeltaTardiness::ComputeDeltaCost(const FP_State& st, const SwapJobs& mv) const {
+  int cost = 0;
+  // Insert the code that computes the delta cost of component 1 for move mv in state st
+  throw logic_error("SwapJobsDeltaTardiness::ComputeDeltaCost not implemented yet");
+  return cost;
+}

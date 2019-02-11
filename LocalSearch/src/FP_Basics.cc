@@ -1,76 +1,64 @@
 // File FP_Basics.cc
 #include "FP_Basics.hh"
 
-FP_State::FP_State(const FP_Input &my_in) 
-  : in(my_in)
-{
-  // Insert the code that initialized the data structure of the
-  // state object based on the input object	
-  cerr << "FP_State::FP_State(const FP_Input &) not implemented yet" << endl;
+FP_State::FP_State(const FP_Input& my_in) : in(my_in) {
+  schedule.resize(my_in.getJobs());
+  for (size_t i = 0; i < my_in.getJobs(); i++) {
+    schedule[i] = i;
+  }
 }
 
-FP_State& FP_State::operator=(const FP_State& st)
-{
-  // Insert the code that copies all data structures of the
-  // state object from the ones of the parameter out
-  // (excluding the reference to the input object, that is constant)
-  throw logic_error("FP_State::operator= not implemented yet");
+FP_State& FP_State::operator=(const FP_State& st) {
+  schedule = st.schedule;
   return *this;
 }
-  
-bool operator==(const FP_State& st1, const FP_State& st2)
-{
-  // Insert the code that compares two states (this is used by the tester)
-  throw logic_error("operator==(const FP_State& st1, const FP_State& st2) not implemented yet");
+
+bool operator==(const FP_State& st1, const FP_State& st2) {
+  for (size_t i = 0; i < st1.in.getJobs(); i++) {
+    if (st1[i] != st2[i]) return false;
+  }
   return true;
 }
 
-
-ostream& operator<<(ostream& os, const FP_State& st)
-{
-  // Insert the code that writes the state object (for debugging)
-  throw logic_error("operator<<(ostream& os, const FP_State& as) not implemented yet");
+ostream& operator<<(ostream& os, const FP_State& st) {
+  for (size_t i = 0; i < st.in.getJobs(); i++) {
+    os << st[i];
+    if (i < st.in.getJobs() - 1) os << " ";
+  }
   return os;
 }
 
-FP_Move::FP_Move()
-{
-  // Insert the code that initialize the move
-  cerr << "FP_Move::FP_Move() not implemented yet" << endl;
+SwapJobs::SwapJobs(unsigned i, unsigned j) {
+  p1 = i;
+  p2 = j;
 }
 
-bool operator==(const FP_Move& mv1, const FP_Move& mv2)
-{
-  // Insert the code that checks if two moves are identical
-  throw logic_error("operator==(const FP_Move& mv1, const FP_Move& mv2) not implemented yet");	
+bool operator==(const SwapJobs& mv1, const SwapJobs& mv2) {
+  if (mv1.p1 != mv2.p1 || mv1.p2 != mv2.p2) return false;
   return true;
 }
 
-bool operator!=(const FP_Move& mv1, const FP_Move& mv2)
-{
-  // Insert the code that checks if two moves are different
-  throw logic_error("operator!=(const FP_Move& mv1, const FP_Move& mv2) not implemented yet");	
+bool operator!=(const SwapJobs& mv1, const SwapJobs& mv2) {
+  if (mv1.p1 == mv1.p2 && mv2.p1 == mv2.p2) return false;
   return true;
 }
 
-bool operator<(const FP_Move& mv1, const FP_Move& mv2)
-{
-  // Insert the code that checks if one move precedes another one
-  // (in any selected order)
-  throw logic_error("operator<(const FP_Move& mv1, const FP_Move& mv2) not implemented yet");	
-  return true;
+bool operator<(const SwapJobs& mv1, const SwapJobs& mv2) {
+  if (mv1.p1 < mv2.p1)
+    return true;
+  else {
+    if (mv1.p1 == mv2.p1 && mv1.p2 < mv2.p2) return true;
+  }
+  return false;
 }
 
-istream& operator>>(istream& is, FP_Move& mv)
-{
-  // Insert the code that read a move
-  throw logic_error("operator>>(istream& is, FP_Move& mv) not implemented yet");	
+istream& operator>>(istream& is, SwapJobs& mv) {
+  char ch;
+  is >> ch >> mv.p1 >> ch >> mv.p2 >> ch;
   return is;
 }
 
-ostream& operator<<(ostream& os, const FP_Move& mv)
-{
-  // Insert the code that writes a move
-  throw logic_error("operator<<(ostream& os, const FP_Move& mv) not implemented yet");	
+ostream& operator<<(ostream& os, const SwapJobs& mv) {
+  os << "(" << mv.p1 << "," << mv.p2 << ")";
   return os;
 }
