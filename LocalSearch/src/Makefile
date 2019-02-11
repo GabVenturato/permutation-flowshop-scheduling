@@ -1,6 +1,6 @@
 EASYLOCAL = ../easylocal-3
 INCLUDE_DIR = ../include
-FLAGS = -std=c++14 -pedantic -Wall -Wextra -Werror -march=native -O3 # -g
+FLAGS = -std=c++14 -Wall -march=native -O3 # -g -Wextra -Werror -pedantic
 COMPOPTS = -I$(EASYLOCAL)/include -I$(INCLUDE_DIR) $(FLAGS)
 LINKOPTS = -lboost_program_options -pthread
 
