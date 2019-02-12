@@ -1,8 +1,11 @@
 // File FP_Basics.cc
 #include "FP_Basics.hh"
+#include <algorithm>
 
 FP_State::FP_State(const FP_Input& my_in) : in(my_in) {
   schedule.resize(my_in.getJobs());
+  start_times.resize(in.getJobs(), vector<size_t>(in.getMachines()));
+  end_times.resize(in.getJobs(), vector<size_t>(in.getMachines()));
   for (size_t i = 0; i < my_in.getJobs(); i++) {
     schedule[i] = i;
   }
@@ -28,7 +31,26 @@ ostream& operator<<(ostream& os, const FP_State& st) {
   return os;
 }
 
-SwapJobs::SwapJobs(unsigned i, unsigned j) {
+void FP_State::ComputeTimes(size_t job) {
+  size_t j;
+  for (size_t m = 0; m < in.getMachines(); ++m) {
+    for (size_t i = job; i < in.getJobs(); ++i) {
+      j = schedule[i];
+      if (m == 0 && i == 0) {
+        start_times[j][m] = max<size_t>(0, in.getReleaseDate(schedule[0]));
+      } else if (m == 0) {
+        start_times[j][m] = max<size_t>(end_times[schedule[i-1]][m], in.getReleaseDate(j));
+      } else if (i == 0) {
+        start_times[j][m] = end_times[j][m-1];
+      } else {
+        start_times[j][m] = max<size_t>(end_times[schedule[i-1]][m], end_times[j][m-1]);
+      }
+      end_times[j][m] = start_times[j][m] + in.getDuration(j,m);
+    }
+  }
+}
+
+SwapJobs::SwapJobs(size_t i, size_t j) {
   p1 = i;
   p2 = j;
 }

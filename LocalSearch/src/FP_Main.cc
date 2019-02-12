@@ -26,8 +26,8 @@ int main(int argc, const char* argv[]) {
   if (seed.IsSet()) Random::SetSeed(seed);
 
   // cost components: second parameter is the cost, third is the type (true -> hard, false -> soft)
-  Makespan cc1(in, 1, true);
-  Tardiness cc2(in, 1, true);
+  Makespan cc1(in, 1, false);
+  Tardiness cc2(in, 1, false);
 
   SwapJobsDeltaMakespan dcc1(in, cc1);
   SwapJobsDeltaTardiness dcc2(in, cc2);
@@ -50,6 +50,9 @@ int main(int argc, const char* argv[]) {
   HillClimbing<FP_Input, FP_State, SwapJobs> FP_hc(in, FP_sm, FP_nhe, "SwapJobsHillClimbing");
   SteepestDescent<FP_Input, FP_State, SwapJobs> FP_sd(in, FP_sm, FP_nhe, "SwapJobsSteepestDescent");
   SimulatedAnnealing<FP_Input, FP_State, SwapJobs> FP_sa(in, FP_sm, FP_nhe, "SwapJobsSimulatedAnnealing");
+  TabuSearch<FP_Input, FP_State, SwapJobs> FP_ts(in, FP_sm, FP_nhe, "SwapJobsTabuSearch",
+                                                   [](const SwapJobs& m1, const SwapJobs& m2)->bool
+                                                   { return m1.p1 == m2.p1 && m1.p2 == m2.p2; });
 
   // tester
   Tester<FP_Input, FP_Output, FP_State> tester(in, FP_sm, FP_om);

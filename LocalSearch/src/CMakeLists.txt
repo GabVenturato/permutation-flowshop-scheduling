@@ -1,7 +1,7 @@
 find_package(Threads REQUIRED)
 find_package(Boost 1.58.0 COMPONENTS program_options REQUIRED)
 
-set(CMAKE_CXX_FLAGS "-Wall")
+set(CMAKE_CXX_FLAGS "-Wall -O3")
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)

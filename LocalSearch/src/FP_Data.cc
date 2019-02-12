@@ -112,91 +112,13 @@ size_t FP_Input::getTotalDuration(size_t job) const {
 }
 
 FP_Output::FP_Output(const FP_Input& my_in)
-    : in(my_in), job_end_times(in.getJobs()), machine_end_times(in.getMachines()) {}
+    : in(my_in) {
+  schedule.resize( in.getJobs() );
+}
 
 FP_Output& FP_Output::operator=(const FP_Output& out) {
   schedule = out.schedule;
-  machine_end_times = out.machine_end_times;
-  job_end_times = out.job_end_times;
   return *this;
-}
-
-void FP_Output::reset() {
-  for (size_t i = 0; i < in.getJobs(); ++i) {
-    job_end_times[i] = 0;
-  }
-
-  for (size_t i = 0; i < in.getMachines(); ++i) {
-    machine_end_times[i] = 0;
-  }
-}
-
-/*!
- * @brief Run a specific job on all machines and update its completion
- * time and the completion time of each machine.
- * @param[in] job The job to run.
- */
-void FP_Output::runJob(size_t job) {
-  // If the release date is <= than the end time of the machine 0
-  // then the job will start from the previous end time of the machine 0
-  if (in.getReleaseDate(job) <= getMTime(0)) {
-    size_t old_time = getMTime(0);
-
-    size_t new_time = old_time + in.getDuration(job, 0);
-    addMTime(new_time, 0);
-  } else {
-    // otherwise it'll start from the value of the release date
-    size_t new_time = in.getReleaseDate(job) + in.getDuration(job, 0);
-    addMTime(new_time, 0);
-  }
-
-  for (size_t i = 1; i < in.getMachines(); ++i) {
-    if (getMTime(i) > getMTime(i - 1)) {
-      // Start from the old time of machine i
-      size_t old_time = getMTime(i);
-
-      size_t new_time = old_time + in.getDuration(job, i);
-      addMTime(new_time, i);
-    } else {
-      // Start from the old time of the previous machine
-      size_t old_time = getMTime(i - 1);
-
-      size_t new_time = old_time + in.getDuration(job, i);
-      addMTime(new_time, i);
-    }
-  }
-
-  addJTime(getMTime(in.getMachines() - 1), job);
-}
-
-/*!
- * @brief Compute the Makespan.
- * @return The Makespan.
- */
-size_t FP_Output::computeMakespan() const {
-  // The Makespan is the end time of the last machine run on the last job
-  // scheduled.
-  return machine_end_times[in.getMachines() - 1];
-}
-
-/*!
- * @brief Compute the tardiness of the schedule.
- * @return The tardiness.
- */
-size_t FP_Output::computeTardiness() const {
-  size_t tardiness = 0;
-  for (size_t i = 0; i < in.getJobs(); ++i) {
-    int due = in.getDueDates(i);
-    // Compute the tardiness only if the job has a due date
-    if (due != -1) {
-      // and if its end time exceeds the due date.
-      if (static_cast<size_t>(due) < job_end_times[i]) {
-        tardiness += (job_end_times[i] - due) * in.getWeight(i);
-      }
-    }
-  }
-
-  return tardiness;
 }
 
 ostream& operator<<(ostream& os, const FP_Output& out) {
