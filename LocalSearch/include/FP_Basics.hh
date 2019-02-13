@@ -14,9 +14,10 @@ class FP_State {
   size_t operator[](unsigned i) const { return schedule[i]; }
   size_t& operator[](unsigned i) { return schedule[i]; }
   /*void reset();*/
-  void ComputeTimes(size_t job = 0);
+  void ComputeTimes(size_t job_index = 0);
   size_t getEndTime(size_t j, size_t m) const { return end_times[j][m]; }
   size_t getSchedule(size_t j) const {return schedule[j]; }
+  size_t getScheduleIndex(size_t job) const;
 
  protected:
   const FP_Input& in;

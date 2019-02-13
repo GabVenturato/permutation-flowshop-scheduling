@@ -136,8 +136,10 @@ ostream& operator<<(ostream& os, const FP_Output& out) {
 }
 
 istream& operator>>(istream& is, FP_Output& out) {
+  char c;
+  is >> c;
   for (size_t i = 0; i < out.in.getJobs(); ++i) {
-    is >> out.schedule[i];
+    is >> out.schedule[i] >> c;
   }
   return is;
 }

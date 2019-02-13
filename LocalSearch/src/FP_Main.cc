@@ -58,7 +58,7 @@ int main(int argc, const char* argv[]) {
   Tester<FP_Input, FP_Output, FP_State> tester(in, FP_sm, FP_om);
   MoveTester<FP_Input, FP_Output, FP_State, SwapJobs> swap_move_test(in, FP_sm, FP_om, FP_nhe, "SwapJobs move", tester);
 
-  SimpleLocalSearch<FP_Input, FP_Output, FP_State> FP_solver(in, FP_sm, FP_om, "XYZ solver");
+  SimpleLocalSearch<FP_Input, FP_Output, FP_State> FP_solver(in, FP_sm, FP_om, "FP solver");
   if (!CommandLineParameters::Parse(argc, argv, true, false)) return 1;
 
   if (!method.IsSet()) {  // If no search method is set -> enter in the tester
@@ -67,16 +67,17 @@ int main(int argc, const char* argv[]) {
     else
       tester.RunMainMenu();
   } else {
-    if (method == string("SA")) {
+    if (method == string("SwapJobsSimulatedAnnealing")) {
       FP_solver.SetRunner(FP_sa);
-    } else if (method == string("HC")) {
+    } else if (method == string("SwapJobsHillClimbing")) {
       FP_solver.SetRunner(FP_hc);
-    } else  // if (method.GetValue() == string("SD"))
-    {
+    } else if (method == string("SwapJobsSteepestDescent")) {
       FP_solver.SetRunner(FP_sd);
+    } else {
+      FP_solver.SetRunner(FP_ts);
     }
     auto result = FP_solver.Solve();
-    // result is a tuple: 0: solutio, 1: number of violations, 2: total cost, 3: computing time
+    // result is a tuple: 0: solution, 1: number of violations, 2: total cost, 3: computing time
     FP_Output out = result.output;
     if (output_file.IsSet()) {  // write the output on the file passed in the command line
       ofstream os(static_cast<string>(output_file).c_str());

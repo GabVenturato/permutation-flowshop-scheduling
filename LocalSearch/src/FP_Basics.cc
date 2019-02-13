@@ -13,6 +13,8 @@ FP_State::FP_State(const FP_Input& my_in) : in(my_in) {
 
 FP_State& FP_State::operator=(const FP_State& st) {
   schedule = st.schedule;
+  start_times = st.start_times;
+  end_times = st.end_times;
   return *this;
 }
 
@@ -31,10 +33,10 @@ ostream& operator<<(ostream& os, const FP_State& st) {
   return os;
 }
 
-void FP_State::ComputeTimes(size_t job) {
+void FP_State::ComputeTimes(size_t job_index) {
   size_t j;
   for (size_t m = 0; m < in.getMachines(); ++m) {
-    for (size_t i = job; i < in.getJobs(); ++i) {
+    for (size_t i = job_index; i < in.getJobs(); ++i) {
       j = schedule[i];
       if (m == 0 && i == 0) {
         start_times[j][m] = max<size_t>(0, in.getReleaseDate(schedule[0]));
@@ -48,6 +50,12 @@ void FP_State::ComputeTimes(size_t job) {
       end_times[j][m] = start_times[j][m] + in.getDuration(j,m);
     }
   }
+}
+
+size_t FP_State::getScheduleIndex(size_t job) const {
+  long d = distance(schedule.begin(), find(schedule.begin(), schedule.end(), job));
+  if (d >= 0) return static_cast<size_t >(d);
+  else throw logic_error("Negative vector index");
 }
 
 SwapJobs::SwapJobs(size_t i, size_t j) {
