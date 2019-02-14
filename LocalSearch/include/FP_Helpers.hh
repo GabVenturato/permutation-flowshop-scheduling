@@ -94,6 +94,20 @@ class MoveJobNeighborhoodExplorer : public NeighborhoodExplorer<FP_Input, FP_Sta
   bool NextMove(const FP_State&, MoveJob&) const;
 };
 
+class DeltaCostHelper {
+ public:
+  DeltaCostHelper(const FP_Input& in, const FP_State& st);
+  size_t operator[](size_t i) const { return schedule[i]; }
+  size_t& operator[](size_t i) { return schedule[i]; }
+  size_t getEndTime(size_t job, size_t machine) const { return end_times[job][machine]; }
+  void ComputeTimes(size_t job_index);
+ protected:
+  vector<vector<size_t>> end_times, start_times;
+  vector<size_t> schedule;
+  const FP_Input& in;
+  const FP_State& st;
+};
+
 /***************************************************************************
  * Output Manager
  ***************************************************************************/

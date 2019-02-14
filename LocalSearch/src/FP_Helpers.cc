@@ -87,6 +87,57 @@ void Tardiness::PrintViolations(const FP_State& st, ostream& os) const {
 }
 
 /*****************************************************************************
+ * DeltaCostHelper
+ *****************************************************************************/
+
+DeltaCostHelper::DeltaCostHelper(const FP_Input& in, const FP_State& st)
+  : in(in), st(st) {
+  for (size_t j = 0; j < in.getJobs(); ++j) {
+    schedule.push_back( st[j] );
+  }
+  
+  start_times.resize( in.getJobs(), vector<size_t>(in.getMachines()) );
+  end_times.resize( in.getJobs(), vector<size_t>(in.getMachines()) );
+}
+
+void DeltaCostHelper::ComputeTimes(size_t job_index) {
+  size_t j;
+
+  // retrieve starting time from current state
+  size_t start_time;
+  if (job_index == 0) {
+    // if swapping job 0, start time is 0 (take care of release date later)
+    start_time = 0;
+  } else {
+    start_time = st.getEndTime(st[job_index-1], 0);
+  }
+
+  // take end times of the previous job for all machines, if it exists
+  if (job_index) {
+    for (size_t m = 0; m < in.getMachines(); ++m) {
+      end_times[st[job_index-1]][m] = st.getEndTime(st[job_index-1],m);
+    }
+  }
+
+  // compute new start and end times
+  for (size_t m = 0; m < in.getMachines(); ++m) {
+    for (size_t i = job_index; i < in.getJobs(); ++i) {
+      j = schedule[i];
+      if (m == 0 && i == 0) {
+        start_times[j][m] = max<size_t>(start_time, in.getReleaseDate(schedule[0]));
+      } else if (m == 0) {
+        start_times[j][m] = max<size_t>(end_times[schedule[i-1]][m], in.getReleaseDate(j));
+      } else if (i == 0) {
+        start_times[j][m] = end_times[j][m-1];
+      } else {
+        start_times[j][m] = max<size_t>(end_times[schedule[i-1]][m], end_times[j][m-1]);
+      }
+      end_times[j][m] = start_times[j][m] + in.getDuration(j,m);
+    }
+  }
+}
+
+/*****************************************************************************
  * SwapJobs Neighborhood Explorer
  * note that to compute delta costs (for both components) it's necessary to save
  * end times, start times, the schedule, and perform the move there in these
@@ -145,85 +196,34 @@ bool SwapJobsNeighborhoodExplorer::NextMove(const FP_State& st, SwapJobs& mv) co
 int SwapJobsDeltaMakespan::ComputeDeltaCost(const FP_State& st, const SwapJobs& mv) const {
   int future_makespan = 0;
   int current_makespan = static_cast<int>(st.getEndTime(st[in.getJobs()-1], in.getMachines()-1));
-  vector<vector<size_t>> s_times, e_times;
-  size_t j;
+  DeltaCostHelper h(in, st);
 
   // since this move is performed using job names, it's needed to retrieve their indexes
   size_t idj1 = st.getScheduleIndex(mv.j1);
   size_t idj2 = st.getScheduleIndex(mv.j2);
 
-  // copy current schedule into auxiliary variable
-  vector<size_t> new_schedule;
-  for (size_t j = 0; j < in.getJobs(); ++j) {
-    new_schedule.push_back(st[j]);
-  }
-
   // perform the move on auxiliary variable
-  swap(new_schedule[idj1],new_schedule[idj2]);
+  swap(h[idj1],h[idj2]);
 
-  // the min index tells where to start the times update
-  size_t sidx = min<size_t>(idj1,idj2);
+  h.ComputeTimes( min<size_t>(idj1,idj2) );
 
-  // retrieve starting time from current state
-  size_t start_time;
-  if (sidx == 0) {
-    // if swapping job 0, start time is 0 (take care of release date later)
-    start_time = 0;
-  } else {
-    start_time = st.getEndTime(st[sidx-1], 0);
-  }
-
-  s_times.resize(in.getJobs(), vector<size_t>(in.getMachines()));
-  e_times.resize(in.getJobs(), vector<size_t>(in.getMachines()));
-
-  // take end times of the previous job for all machines, if it exists
-  if (sidx) {
-    for (size_t m = 0; m < in.getMachines(); ++m) {
-      e_times[st[sidx-1]][m] = st.getEndTime(st[sidx-1],m);
-    }
-  }
-
-  // compute new start and end times
-  for (size_t m = 0; m < in.getMachines(); ++m) {
-    for (size_t i = sidx; i < in.getJobs(); ++i) {
-      j = new_schedule[i];
-      if (m == 0 && i == 0) {
-        s_times[j][m] = max<size_t>(start_time, in.getReleaseDate(new_schedule[0]));
-      } else if (m == 0) {
-        s_times[j][m] = max<size_t>(e_times[new_schedule[i-1]][m], in.getReleaseDate(j));
-      } else if (i == 0) {
-        s_times[j][m] = e_times[j][m-1];
-      } else {
-        s_times[j][m] = max<size_t>(e_times[new_schedule[i-1]][m], e_times[j][m-1]);
-      }
-      e_times[j][m] = s_times[j][m] + in.getDuration(j,m);
-    }
-  }
-
-  future_makespan = static_cast<int>(e_times[new_schedule[in.getJobs()-1]][in.getMachines()-1]);
+  future_makespan = static_cast<int>(h.getEndTime(h[in.getJobs()-1], in.getMachines()-1));
 
   return future_makespan - current_makespan;
 }
 
 int SwapJobsDeltaTardiness::ComputeDeltaCost(const FP_State& st, const SwapJobs& mv) const {
   int partial_future_tardiness = 0, partial_current_tardiness = 0;
-  vector<vector<size_t>> s_times, e_times;
   size_t j;
+  DeltaCostHelper h(in, st);
 
   // since this move is performed using job names, it's needed to retrieve their indexes
   size_t idj1 = st.getScheduleIndex(mv.j1);
   size_t idj2 = st.getScheduleIndex(mv.j2);
 
-  // copy current schedule into auxiliary variable
-  vector<size_t> new_schedule;
-  for (size_t j = 0; j < in.getJobs(); ++j) {
-    new_schedule.push_back(st[j]);
-  }
-
   // perform the move on auxiliary variable
-  swap(new_schedule[idj1],new_schedule[idj2]);
+  swap(h[idj1],h[idj2]);
 
-  // perform the move on auxiliary variable
   size_t sidx = min<size_t>(idj1,idj2);
 
   // compute current tardiness
@@ -236,48 +236,14 @@ int SwapJobsDeltaTardiness::ComputeDeltaCost(const FP_State& st, const SwapJobs&
     }
   }
 
-  // retrieve starting time from current state
-  size_t start_time;
-  if (sidx == 0) {
-    // if swapping job 0, start time is 0 (take care of release date later)
-    start_time = 0;
-  } else {
-    start_time = st.getEndTime(st[sidx-1], 0);
-  }
-
-  s_times.resize(in.getJobs(), vector<size_t>(in.getMachines()));
-  e_times.resize(in.getJobs(), vector<size_t>(in.getMachines()));
-
-  // take end times of the previous job for all machines, if it exists
-  if (sidx) {
-    for (size_t m = 0; m < in.getMachines(); ++m) {
-      e_times[ st[sidx-1] ][m] = st.getEndTime(st[sidx-1],m);
-    }
-  }
-
-  // compute new start and end times
-  for (size_t m = 0; m < in.getMachines(); ++m) {
-    for (size_t i = sidx; i < in.getJobs(); ++i) {
-      j = new_schedule[i];
-      if (m == 0 && i == 0) {
-        s_times[j][m] = max<size_t>(start_time, in.getReleaseDate(new_schedule[0]));
-      } else if (m == 0) {
-        s_times[j][m] = max<size_t>(e_times[new_schedule[i-1]][m], in.getReleaseDate(j));
-      } else if (i == 0) {
-        s_times[j][m] = e_times[j][m-1];
-      } else {
-        s_times[j][m] = max<size_t>(e_times[new_schedule[i-1]][m], e_times[j][m-1]);
-      }
-      e_times[j][m] = s_times[j][m] + in.getDuration(j,m);
-    }
-  }
+  h.ComputeTimes(sidx);
 
   // compute new tardiness
   for (size_t i = sidx; i < in.getJobs(); ++i) {
-    j = new_schedule[i];
+    j = h[i];
     if (in.getDueDates(j) != -1) {
-      if (static_cast<size_t>(in.getDueDates(j)) < e_times[j][in.getMachines()-1]) {
-        partial_future_tardiness += (e_times[j][in.getMachines()-1] - in.getDueDates(j)) * in.getWeight(j);
+      if (static_cast<size_t>(in.getDueDates(j)) < h.getEndTime(j, in.getMachines()-1)) {
+        partial_future_tardiness += (h.getEndTime(j, in.getMachines()-1) - in.getDueDates(j)) * in.getWeight(j);
       }
     }
   }
@@ -337,77 +303,34 @@ bool MoveJobNeighborhoodExplorer::NextMove(const FP_State& st, MoveJob& mv) cons
 int MoveJobDeltaMakespan::ComputeDeltaCost(const FP_State& st, const MoveJob& mv) const {
   int future_makespan = 0;
   int current_makespan = static_cast<int>(st.getEndTime(st[in.getJobs()-1], in.getMachines()-1));
-  vector<size_t> new_schedule;
+  DeltaCostHelper h(in, st);
   size_t moving_job;
-  vector<vector<size_t>> s_times, e_times;
-
-  for (size_t j = 0; j < in.getJobs(); ++j) {
-    new_schedule.push_back(st[j]);
-  }
 
   // compute new schedule
-  moving_job = new_schedule[mv.p1];
+  moving_job = h[mv.p1];
   for (size_t j = mv.p1; j < mv.p2; ++j) {
-    new_schedule[j] = new_schedule[j+1];
+    h[j] = h[j+1];
   }
-  new_schedule[mv.p2] = moving_job;
+  h[mv.p2] = moving_job;
 
-  // retrieve starting time from current state
-  size_t start_time;
-  if (mv.p1 == 0) {
-    // if swapping job 0, start time is 0 (take care of release date later)
-    start_time = 0;
-  } else {
-    start_time = st.getEndTime(st[mv.p1-1], 0);
-  }
+  h.ComputeTimes(mv.p1);
 
-  s_times.resize(in.getJobs(), vector<size_t>(in.getMachines()));
-  e_times.resize(in.getJobs(), vector<size_t>(in.getMachines()));
-
-  if (mv.p1) {
-    for (size_t m = 0; m < in.getMachines(); ++m) {
-      e_times[ st[mv.p1-1] ][m] = st.getEndTime(st[mv.p1-1], m);
-    }
-  }
-
-  size_t j;
-  for (size_t m = 0; m < in.getMachines(); ++m) {
-    for (size_t i = mv.p1; i < in.getJobs(); ++i) {
-      j = new_schedule[i];
-      if (m == 0 && i == 0) {
-        s_times[j][m] = max<size_t>(start_time, in.getReleaseDate(new_schedule[0]));
-      } else if (m == 0) {
-        s_times[j][m] = max<size_t>(e_times[new_schedule[i-1]][m], in.getReleaseDate(j));
-      } else if (i == 0) {
-        s_times[j][m] = e_times[j][m-1];
-      } else {
-        s_times[j][m] = max<size_t>(e_times[new_schedule[i-1]][m], e_times[j][m-1]);
-      }
-      e_times[j][m] = s_times[j][m] + in.getDuration(j,m);
-    }
-  }
-
-  future_makespan = static_cast<int>(e_times[new_schedule[in.getJobs()-1]][in.getMachines()-1]);
+  future_makespan = static_cast<int>(h.getEndTime(h[in.getJobs()-1], in.getMachines()-1));
 
   return future_makespan - current_makespan;
 }
 
 int MoveJobDeltaTardiness::ComputeDeltaCost(const FP_State& st, const MoveJob& mv) const {
   int partial_future_tardiness = 0, partial_current_tardiness = 0;
-  vector<size_t> new_schedule;
+  DeltaCostHelper h(in, st);
   size_t moving_job, j;
-  vector<vector<size_t>> s_times, e_times;
-
-  for (size_t j = 0; j < in.getJobs(); ++j) {
-    new_schedule.push_back(st[j]);
-  }
 
   // compute new schedule
-  moving_job = new_schedule[mv.p1];
+  moving_job = h[mv.p1];
   for (size_t j = mv.p1; j < mv.p2; ++j) {
-    new_schedule[j] = new_schedule[j+1];
+    h[j] = h[j+1];
   }
-  new_schedule[mv.p2] = moving_job;
+  h[mv.p2] = moving_job;
 
   // compute current tardiness
   for (size_t i = mv.p1; i < in.getJobs(); ++i) {
@@ -419,46 +342,14 @@ int MoveJobDeltaTardiness::ComputeDeltaCost(const FP_State& st, const MoveJob& m
     }
   }
 
-  // retrieve starting time from current state
-  size_t start_time;
-  if (mv.p1 == 0) {
-    // if swapping job 0, start time is 0 (take care of release date later)
-    start_time = 0;
-  } else {
-    start_time = st.getEndTime(st[mv.p1-1], 0);
-  }
-
-  s_times.resize(in.getJobs(), vector<size_t>(in.getMachines()));
-  e_times.resize(in.getJobs(), vector<size_t>(in.getMachines()));
-
-  if (mv.p1) {
-    for (size_t m = 0; m < in.getMachines(); ++m) {
-      e_times[ st[mv.p1-1] ][m] = st.getEndTime(st[mv.p1-1], m);
-    }
-  }
-
-  for (size_t m = 0; m < in.getMachines(); ++m) {
-    for (size_t i = mv.p1; i < in.getJobs(); ++i) {
-      j = new_schedule[i];
-      if (m == 0 && i == 0) {
-        s_times[j][m] = max<size_t>(start_time, in.getReleaseDate(new_schedule[0]));
-      } else if (m == 0) {
-        s_times[j][m] = max<size_t>(e_times[new_schedule[i-1]][m], in.getReleaseDate(j));
-      } else if (i == 0) {
-        s_times[j][m] = e_times[j][m-1];
-      } else {
-        s_times[j][m] = max<size_t>(e_times[new_schedule[i-1]][m], e_times[j][m-1]);
-      }
-      e_times[j][m] = s_times[j][m] + in.getDuration(j,m);
-    }
-  }
+  h.ComputeTimes(mv.p1);
 
   // compute new tardiness
   for (size_t i = mv.p1; i < in.getJobs(); ++i) {
-    j = new_schedule[i];
+    j = h[i];
     if (in.getDueDates(j) != -1) {
-      if (static_cast<size_t>(in.getDueDates(j)) < e_times[j][in.getMachines()-1]) {
-        partial_future_tardiness += (e_times[j][in.getMachines()-1] - in.getDueDates(j)) * in.getWeight(j);
+      if (static_cast<size_t>(in.getDueDates(j)) < h.getEndTime(j, in.getMachines()-1)) {
+        partial_future_tardiness += (h.getEndTime(j, in.getMachines()-1) - in.getDueDates(j)) * in.getWeight(j);
       }
     }
   }
