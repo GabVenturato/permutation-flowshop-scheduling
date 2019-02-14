@@ -6,6 +6,8 @@ FP_State::FP_State(const FP_Input& my_in) : in(my_in) {
   schedule.resize(my_in.getJobs());
   start_times.resize(in.getJobs(), vector<size_t>(in.getMachines()));
   end_times.resize(in.getJobs(), vector<size_t>(in.getMachines()));
+
+  // Default state = [0,1,2,...,jobs-1]
   for (size_t i = 0; i < my_in.getJobs(); i++) {
     schedule[i] = i;
   }
@@ -33,6 +35,10 @@ ostream& operator<<(ostream& os, const FP_State& st) {
   return os;
 }
 
+/*!
+ * @brief Computes start and end time for each job and each machine starting from `job_index`
+ * @param[in] job_index     The index of the job from which to start computing the start and end times.
+ */
 void FP_State::ComputeTimes(size_t job_index) {
   size_t j;
   for (size_t m = 0; m < in.getMachines(); ++m) {
@@ -52,9 +58,14 @@ void FP_State::ComputeTimes(size_t job_index) {
   }
 }
 
+/*!
+ * @brief Returns the index of the job passed as input in the schedule.
+ * @param[in] job   The job number for which we want to get its index.
+ * @return The index of the provided job inside the schedule.
+ */
 size_t FP_State::getScheduleIndex(size_t job) const {
   long d = distance(schedule.begin(), find(schedule.begin(), schedule.end(), job));
-  if (d >= 0) return static_cast<size_t >(d);
+  if (d >= 0) return static_cast<size_t>(d);
   else throw logic_error("Negative vector index");
 }
 
