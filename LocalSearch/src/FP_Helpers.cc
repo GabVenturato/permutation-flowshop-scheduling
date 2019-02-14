@@ -7,13 +7,18 @@
 
 void FP_StateManager::RandomState(FP_State& st) {
   size_t j;
+
+  // put jobs in order from 0 to m-1
   for (unsigned i = 0; i < in.getJobs(); ++i) {
     st[i] = i;
   }
+
+  // randomly swap couples of jobs
   for (size_t i = 0; i < in.getJobs(); i++) {
     j = Random::Uniform<size_t>(i, in.getJobs() - 1);
     swap(st[i], st[j]);
   }
+
   st.ComputeTimes();
 }
 
@@ -38,6 +43,10 @@ void FP_OutputManager::OutputState(const FP_State& st, FP_Output& out) const {
  * Cost Components
  ***************************************************************************/
 
+/**
+ * Cost Component 1: Makespan
+ * It's the end time of the last job on last machine.
+ */
 int Makespan::ComputeCost(const FP_State& st) const {
   return static_cast<int>(st.getEndTime(st[in.getJobs()-1], in.getMachines()-1));
 }
@@ -46,6 +55,10 @@ void Makespan::PrintViolations(const FP_State& st, ostream& os) const {
   os << "Makespan is " << ComputeCost(st) << endl;
 }
 
+/**
+ * Cost Component 2: Tardiness
+ * Weighted difference between the end time of the job and the due date.
+ */
 int Tardiness::ComputeCost(const FP_State& st) const {
   unsigned cost = 0;
   size_t j;
@@ -75,15 +88,26 @@ void Tardiness::PrintViolations(const FP_State& st, ostream& os) const {
 
 /*****************************************************************************
  * SwapJobs Neighborhood Explorer
+ * note that to compute delta costs (for both components) it's necessary to save
+ * end times, start times, the schedule, and perform the move there in these
+ * auxiliary data structures.
+ * Then it's necessary to recompute all times from the job swapped with
+ * lower index until the last job in the schedule, for all the machines,
+ * because the change will be propagated and it's not possible to compute it in
+ * less than O(mn), where m is the number of jobs and n the number of machines.
  *****************************************************************************/
 
 // initial move builder
 void SwapJobsNeighborhoodExplorer::RandomMove(const FP_State& st, SwapJobs& mv) const {
   mv.j1 = Random::Uniform<size_t>(0, in.getJobs() - 1);
   mv.j2 = Random::Uniform<size_t>(0, in.getJobs() - 2);
+
+  // to avoid null move and restore the range [0,m] of the random sample
   if (mv.j2 >= mv.j1)
     mv.j2++;
-  if (mv.j1 > mv.j2) // swap j1 and j2 so that j1 < j2
+
+  // swap j1 and j2 so that j1 < j2
+  if (mv.j1 > mv.j2)
     swap(mv.j1, mv.j2);
 }
 
@@ -121,14 +145,24 @@ bool SwapJobsNeighborhoodExplorer::NextMove(const FP_State& st, SwapJobs& mv) co
 int SwapJobsDeltaMakespan::ComputeDeltaCost(const FP_State& st, const SwapJobs& mv) const {
   int future_makespan = 0;
   int current_makespan = static_cast<int>(st.getEndTime(st[in.getJobs()-1], in.getMachines()-1));
+  vector<vector<size_t>> s_times, e_times;
+  size_t j;
+
+  // since this move is performed using job names, it's needed to retrieve their indexes
   size_t idj1 = st.getScheduleIndex(mv.j1);
   size_t idj2 = st.getScheduleIndex(mv.j2);
-  size_t sidx = min<size_t>(idj1,idj2);
+
+  // copy current schedule into auxiliary variable
   vector<size_t> new_schedule;
   for (size_t j = 0; j < in.getJobs(); ++j) {
     new_schedule.push_back(st[j]);
   }
+
+  // perform the move on auxiliary variable
   swap(new_schedule[idj1],new_schedule[idj2]);
+
+  // the min index tells where to start the times update
+  size_t sidx = min<size_t>(idj1,idj2);
 
   // retrieve starting time from current state
   size_t start_time;
@@ -139,17 +173,17 @@ int SwapJobsDeltaMakespan::ComputeDeltaCost(const FP_State& st, const SwapJobs& 
     start_time = st.getEndTime(st[sidx-1], 0);
   }
 
-  vector<vector<size_t>> s_times, e_times;
   s_times.resize(in.getJobs(), vector<size_t>(in.getMachines()));
   e_times.resize(in.getJobs(), vector<size_t>(in.getMachines()));
 
+  // take end times of the previous job for all machines, if it exists
   if (sidx) {
     for (size_t m = 0; m < in.getMachines(); ++m) {
       e_times[st[sidx-1]][m] = st.getEndTime(st[sidx-1],m);
     }
   }
 
-  size_t j;
+  // compute new start and end times
   for (size_t m = 0; m < in.getMachines(); ++m) {
     for (size_t i = sidx; i < in.getJobs(); ++i) {
       j = new_schedule[i];
@@ -173,16 +207,26 @@ int SwapJobsDeltaMakespan::ComputeDeltaCost(const FP_State& st, const SwapJobs& 
 
 int SwapJobsDeltaTardiness::ComputeDeltaCost(const FP_State& st, const SwapJobs& mv) const {
   int partial_future_tardiness = 0, partial_current_tardiness = 0;
+  vector<vector<size_t>> s_times, e_times;
+  size_t j;
+
+  // since this move is performed using job names, it's needed to retrieve their indexes
   size_t idj1 = st.getScheduleIndex(mv.j1);
   size_t idj2 = st.getScheduleIndex(mv.j2);
-  size_t sidx = min<size_t>(idj1,idj2);
+
+  // copy current schedule into auxiliary variable
   vector<size_t> new_schedule;
   for (size_t j = 0; j < in.getJobs(); ++j) {
     new_schedule.push_back(st[j]);
   }
+
+  // perform the move on auxiliary variable
   swap(new_schedule[idj1],new_schedule[idj2]);
 
-  size_t j;
+  // perform the move on auxiliary variable
+  size_t sidx = min<size_t>(idj1,idj2);
+
+  // compute current tardiness
   for (size_t i = sidx; i < in.getJobs(); ++i) {
     j = st[i];
     if (in.getDueDates(j) != -1) {
@@ -201,16 +245,17 @@ int SwapJobsDeltaTardiness::ComputeDeltaCost(const FP_State& st, const SwapJobs&
     start_time = st.getEndTime(st[sidx-1], 0);
   }
 
-  vector<vector<size_t>> s_times, e_times;
   s_times.resize(in.getJobs(), vector<size_t>(in.getMachines()));
   e_times.resize(in.getJobs(), vector<size_t>(in.getMachines()));
 
+  // take end times of the previous job for all machines, if it exists
   if (sidx) {
     for (size_t m = 0; m < in.getMachines(); ++m) {
       e_times[ st[sidx-1] ][m] = st.getEndTime(st[sidx-1],m);
     }
   }
 
+  // compute new start and end times
   for (size_t m = 0; m < in.getMachines(); ++m) {
     for (size_t i = sidx; i < in.getJobs(); ++i) {
       j = new_schedule[i];
@@ -227,6 +272,7 @@ int SwapJobsDeltaTardiness::ComputeDeltaCost(const FP_State& st, const SwapJobs&
     }
   }
 
+  // compute new tardiness
   for (size_t i = sidx; i < in.getJobs(); ++i) {
     j = new_schedule[i];
     if (in.getDueDates(j) != -1) {
@@ -241,6 +287,8 @@ int SwapJobsDeltaTardiness::ComputeDeltaCost(const FP_State& st, const SwapJobs&
 
 /*****************************************************************************
  * MoveJob Neighborhood Explorer
+ * same note of SwapJobs move for delta costs must be done here.
+ * Look for the comment above.
  *****************************************************************************/
 
 // initial move builder
