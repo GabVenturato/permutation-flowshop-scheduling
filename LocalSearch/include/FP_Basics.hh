@@ -13,7 +13,6 @@ class FP_State {
   FP_State& operator=(const FP_State& s);
   size_t operator[](unsigned i) const { return schedule[i]; }
   size_t& operator[](unsigned i) { return schedule[i]; }
-  /*void reset();*/
   void ComputeTimes(size_t job_index = 0);
   size_t getEndTime(size_t j, size_t m) const { return end_times[j][m]; }
   size_t getScheduleIndex(size_t job) const;
@@ -25,6 +24,7 @@ class FP_State {
   vector<vector<size_t>> end_times;
 };
 
+// Swap job i and job j.
 class SwapJobs {
   friend bool operator==(const SwapJobs& m1, const SwapJobs& m2);
   friend bool operator!=(const SwapJobs& m1, const SwapJobs& m2);
@@ -37,6 +37,7 @@ class SwapJobs {
   size_t j1, j2;
 };
 
+// Move job from index p1 to index p2.
 class MoveJob {
   friend bool operator==(const MoveJob& m1, const MoveJob& m2);
   friend bool operator!=(const MoveJob& m1, const MoveJob& m2);
