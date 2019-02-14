@@ -20,7 +20,6 @@ class FP_Input {
   size_t getReleaseDate(size_t job) const { return release_dates[job]; }
   int getDueDates(size_t job) const { return due_dates[job]; }
   size_t getWeight(size_t job) const { return weights[job]; }
-  size_t getTotalDuration(size_t job) const;
 
  private:
   size_t jobs, machines;
@@ -37,10 +36,8 @@ class FP_Output {
  public:
   FP_Output(const FP_Input& i);
   FP_Output& operator=(const FP_Output& out);
-  void addJob(size_t j) { schedule.push_back(j); }
   size_t operator[](size_t j) const { return schedule[j]; }
   size_t& operator[](size_t j) { return schedule[j]; }
-  vector<size_t>& getSchedule() { return schedule; }
 
  protected:
   const FP_Input& in;

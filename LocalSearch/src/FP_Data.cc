@@ -97,20 +97,6 @@ ostream& operator<<(ostream& os, const FP_Input& in) {
   return os;
 }
 
-/*!
- * @brief Return the total duration of a job as the sum of the processing
- * time of each machine for that particular job.
- * @param[in] job The job for which we compute its total duration.
- * @return The completion time of the job.
- */
-size_t FP_Input::getTotalDuration(size_t job) const {
-  size_t res = 0;
-  for (size_t m = 0; m < machines; ++m) {
-    res += durations[job][m];
-  }
-  return res;
-}
-
 FP_Output::FP_Output(const FP_Input& my_in)
     : in(my_in) {
   schedule.resize( in.getJobs() );
