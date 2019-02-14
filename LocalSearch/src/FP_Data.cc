@@ -122,7 +122,7 @@ FP_Output& FP_Output::operator=(const FP_Output& out) {
 }
 
 ostream& operator<<(ostream& os, const FP_Output& out) {
-  os << "Schedule: [";
+  os << "[";
   for (size_t i = 0; i < out.in.getJobs(); ++i) {
     os << out.schedule[i];
     if (i < out.in.getJobs() - 1) {

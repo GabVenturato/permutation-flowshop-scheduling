@@ -16,7 +16,6 @@ class FP_State {
   /*void reset();*/
   void ComputeTimes(size_t job_index = 0);
   size_t getEndTime(size_t j, size_t m) const { return end_times[j][m]; }
-  size_t getSchedule(size_t j) const {return schedule[j]; }
   size_t getScheduleIndex(size_t job) const;
 
  protected:
@@ -35,6 +34,18 @@ class SwapJobs {
 
  public:
   SwapJobs(size_t i = 0, size_t j = 0);
+  size_t j1, j2;
+};
+
+class MoveJob {
+  friend bool operator==(const MoveJob& m1, const MoveJob& m2);
+  friend bool operator!=(const MoveJob& m1, const MoveJob& m2);
+  friend bool operator<(const MoveJob& m1, const MoveJob& m2);
+  friend ostream& operator<<(ostream& os, const MoveJob& c);
+  friend istream& operator>>(istream& is, MoveJob& c);
+
+public:
+  MoveJob(size_t i = 0, size_t j = 0);
   size_t p1, p2;
 };
 #endif

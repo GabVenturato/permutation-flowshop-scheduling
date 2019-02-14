@@ -63,8 +63,35 @@ class SwapJobsNeighborhoodExplorer : public NeighborhoodExplorer<FP_Input, FP_St
   void MakeMove(FP_State&, const SwapJobs&) const;
   void FirstMove(const FP_State&, SwapJobs&) const;
   bool NextMove(const FP_State&, SwapJobs&) const;
+};
 
- protected:
+/***************************************************************************
+ * MoveJob Neighborhood Explorer
+ ***************************************************************************/
+
+class MoveJobDeltaMakespan : public DeltaCostComponent<FP_Input, FP_State, MoveJob> {
+public:
+  MoveJobDeltaMakespan(const FP_Input& in, Makespan& cc)
+      : DeltaCostComponent<FP_Input, FP_State, MoveJob>(in, cc, "MoveJobDeltaMakespan") {}
+  int ComputeDeltaCost(const FP_State& st, const MoveJob& mv) const;
+};
+
+class MoveJobDeltaTardiness : public DeltaCostComponent<FP_Input, FP_State, MoveJob> {
+public:
+  MoveJobDeltaTardiness(const FP_Input& in, Tardiness& cc)
+      : DeltaCostComponent<FP_Input, FP_State, MoveJob>(in, cc, "MoveJobDeltaTardiness") {}
+  int ComputeDeltaCost(const FP_State& st, const MoveJob& mv) const;
+};
+
+class MoveJobNeighborhoodExplorer : public NeighborhoodExplorer<FP_Input, FP_State, MoveJob> {
+public:
+  MoveJobNeighborhoodExplorer(const FP_Input& pin, StateManager<FP_Input, FP_State>& psm)
+      : NeighborhoodExplorer<FP_Input, FP_State, MoveJob>(pin, psm, "MoveJobNeighborhoodExplorer") {}
+  void RandomMove(const FP_State&, MoveJob&) const;
+  bool FeasibleMove(const FP_State&, const MoveJob&) const;
+  void MakeMove(FP_State&, const MoveJob&) const;
+  void FirstMove(const FP_State&, MoveJob&) const;
+  bool NextMove(const FP_State&, MoveJob&) const;
 };
 
 /***************************************************************************

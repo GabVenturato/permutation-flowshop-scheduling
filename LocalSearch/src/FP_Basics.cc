@@ -59,21 +59,56 @@ size_t FP_State::getScheduleIndex(size_t job) const {
 }
 
 SwapJobs::SwapJobs(size_t i, size_t j) {
-  p1 = i;
-  p2 = j;
+  j1 = i;
+  j2 = j;
 }
 
 bool operator==(const SwapJobs& mv1, const SwapJobs& mv2) {
-  if (mv1.p1 != mv2.p1 || mv1.p2 != mv2.p2) return false;
+  if (mv1.j1 != mv2.j1 || mv1.j2 != mv2.j2) return false;
   return true;
 }
 
 bool operator!=(const SwapJobs& mv1, const SwapJobs& mv2) {
-  if (mv1.p1 == mv1.p2 && mv2.p1 == mv2.p2) return false;
+  if (mv1.j1 == mv1.j2 && mv2.j1 == mv2.j2) return false;
   return true;
 }
 
 bool operator<(const SwapJobs& mv1, const SwapJobs& mv2) {
+  if (mv1.j1 < mv2.j1)
+    return true;
+  else {
+    if (mv1.j1 == mv2.j1 && mv1.j2 < mv2.j2) return true;
+  }
+  return false;
+}
+
+istream& operator>>(istream& is, SwapJobs& mv) {
+  char ch;
+  is >> ch >> mv.j1 >> ch >> mv.j2 >> ch;
+  return is;
+}
+
+ostream& operator<<(ostream& os, const SwapJobs& mv) {
+  os << "(" << mv.j1 << "," << mv.j2 << ")";
+  return os;
+}
+
+MoveJob::MoveJob(size_t i, size_t j) {
+  p1 = i;
+  p2 = j;
+}
+
+bool operator==(const MoveJob& mv1, const MoveJob& mv2) {
+  if (mv1.p1 != mv2.p1 || mv1.p2 != mv2.p2) return false;
+  return true;
+}
+
+bool operator!=(const MoveJob& mv1, const MoveJob& mv2) {
+  if (mv1.p1 == mv1.p2 && mv2.p1 == mv2.p2) return false;
+  return true;
+}
+
+bool operator<(const MoveJob& mv1, const MoveJob& mv2) {
   if (mv1.p1 < mv2.p1)
     return true;
   else {
@@ -82,13 +117,13 @@ bool operator<(const SwapJobs& mv1, const SwapJobs& mv2) {
   return false;
 }
 
-istream& operator>>(istream& is, SwapJobs& mv) {
+istream& operator>>(istream& is, MoveJob& mv) {
   char ch;
   is >> ch >> mv.p1 >> ch >> mv.p2 >> ch;
   return is;
 }
 
-ostream& operator<<(ostream& os, const SwapJobs& mv) {
+ostream& operator<<(ostream& os, const MoveJob& mv) {
   os << "(" << mv.p1 << "," << mv.p2 << ")";
   return os;
 }

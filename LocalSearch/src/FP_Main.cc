@@ -32,9 +32,14 @@ int main(int argc, const char* argv[]) {
   SwapJobsDeltaMakespan dcc1(in, cc1);
   SwapJobsDeltaTardiness dcc2(in, cc2);
 
+  MoveJobDeltaMakespan mj_dcc1(in, cc1);
+  MoveJobDeltaTardiness mj_dcc2(in, cc2);
+
   // helpers
   FP_StateManager FP_sm(in);
   SwapJobsNeighborhoodExplorer FP_nhe(in, FP_sm);
+
+  MoveJobNeighborhoodExplorer FP_mj_nhe(in, FP_sm);
 
   FP_OutputManager FP_om(in);
 
@@ -46,17 +51,25 @@ int main(int argc, const char* argv[]) {
   FP_nhe.AddDeltaCostComponent(dcc1);
   FP_nhe.AddDeltaCostComponent(dcc2);
 
+  FP_mj_nhe.AddDeltaCostComponent(mj_dcc1);
+  FP_mj_nhe.AddDeltaCostComponent(mj_dcc2);
+
   // runners
   HillClimbing<FP_Input, FP_State, SwapJobs> FP_hc(in, FP_sm, FP_nhe, "SwapJobsHillClimbing");
   SteepestDescent<FP_Input, FP_State, SwapJobs> FP_sd(in, FP_sm, FP_nhe, "SwapJobsSteepestDescent");
   SimulatedAnnealing<FP_Input, FP_State, SwapJobs> FP_sa(in, FP_sm, FP_nhe, "SwapJobsSimulatedAnnealing");
   TabuSearch<FP_Input, FP_State, SwapJobs> FP_ts(in, FP_sm, FP_nhe, "SwapJobsTabuSearch",
                                                    [](const SwapJobs& m1, const SwapJobs& m2)->bool
-                                                   { return m1.p1 == m2.p1 && m1.p2 == m2.p2; });
+                                                   { return m1.j1 == m2.j1 && m1.j2 == m2.j2; });
+
+  HillClimbing<FP_Input, FP_State, MoveJob> FP_mj_hc(in, FP_sm, FP_mj_nhe, "MoveJobHillClimbing");
+  SteepestDescent<FP_Input, FP_State, MoveJob> FP_mj_sd(in, FP_sm, FP_mj_nhe, "MoveJobSteepestDescent");
+  SimulatedAnnealing<FP_Input, FP_State, MoveJob> FP_mj_sa(in, FP_sm, FP_mj_nhe, "MoveJobSimulatedAnnealing");
 
   // tester
   Tester<FP_Input, FP_Output, FP_State> tester(in, FP_sm, FP_om);
   MoveTester<FP_Input, FP_Output, FP_State, SwapJobs> swap_move_test(in, FP_sm, FP_om, FP_nhe, "SwapJobs move", tester);
+  MoveTester<FP_Input, FP_Output, FP_State, MoveJob> job_move_test(in, FP_sm, FP_om, FP_mj_nhe, "MoveJob move", tester);
 
   SimpleLocalSearch<FP_Input, FP_Output, FP_State> FP_solver(in, FP_sm, FP_om, "FP solver");
   if (!CommandLineParameters::Parse(argc, argv, true, false)) return 1;
@@ -73,8 +86,14 @@ int main(int argc, const char* argv[]) {
       FP_solver.SetRunner(FP_hc);
     } else if (method == string("SwapJobsSteepestDescent")) {
       FP_solver.SetRunner(FP_sd);
-    } else {
+    } else if (method == string("SwapJobsTabuSearch")) {
       FP_solver.SetRunner(FP_ts);
+    } else  if (method == string("MoveJobSimulatedAnnealing")) {
+      FP_solver.SetRunner(FP_mj_sa);
+    } else if (method == string("MoveJobHillClimbing")) {
+      FP_solver.SetRunner(FP_mj_hc);
+    } else {
+      FP_solver.SetRunner(FP_mj_sd);
     }
     auto result = FP_solver.Solve();
     // result is a tuple: 0: solution, 1: number of violations, 2: total cost, 3: computing time
