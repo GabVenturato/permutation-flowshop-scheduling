@@ -88,6 +88,8 @@ void Tardiness::PrintViolations(const FP_State& st, ostream& os) const {
 
 /*****************************************************************************
  * DeltaCostHelper
+ * helper class to compute delta costs. useful to have a shared function to
+ * compute times, which is the same for every delta cost component.
  *****************************************************************************/
 
 DeltaCostHelper::DeltaCostHelper(const FP_Input& in, const FP_State& st)
@@ -100,6 +102,11 @@ DeltaCostHelper::DeltaCostHelper(const FP_Input& in, const FP_State& st)
   end_times.resize( in.getJobs(), vector<size_t>(in.getMachines()) );
 }
 
+/*!
+ * @brief Given a job index it computes start/end times. Note that it doesn't
+ * compute the whole matrix but only the sub matrix from the job_index's row.
+ * @param[in] job_index
+ */
 void DeltaCostHelper::ComputeTimes(size_t job_index) {
   size_t j;
 

@@ -24,7 +24,7 @@ class FP_State {
   vector<vector<size_t>> end_times;
 };
 
-// Swap job i and job j.
+// Swap job j1 and job j2.
 class SwapJobs {
   friend bool operator==(const SwapJobs& m1, const SwapJobs& m2);
   friend bool operator!=(const SwapJobs& m1, const SwapJobs& m2);
