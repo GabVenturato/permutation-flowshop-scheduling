@@ -2,7 +2,7 @@
 *.gch
 *.pch
 src/FP_Test
-EnumGreedy/src/FP_Test
+Enum_Greedy/src/FP_Test
 .vscode
 .clang-format
 LocalSearch/src/FP
