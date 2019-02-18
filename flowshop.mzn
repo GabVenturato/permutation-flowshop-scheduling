@@ -22,27 +22,27 @@ var int: Cost;
 % CONSTRAINTS
 constraint alldifferent(JobsOrder);
 
-% first job should start as soon as possible
+% first job executed ends without delays between operations
 constraint
-   Execution[ JobsOrder[1], 1 ] = min(ReleaseDates);
+    Execution[JobsOrder[1],Machines] = ReleaseDates[JobsOrder[1]] + sum (m in 1..Machines) ( ProcessingTimes[JobsOrder[1],m] );
 
 % i-th operation must start after (i-1)-th operation
 constraint
-    forall (j in 1..Jobs, m in 2..Machines) (
-        Execution[JobsOrder[j],m] >= Execution[JobsOrder[j],m-1] + ProcessingTimes[JobsOrder[j],m-1]
-    );
+    sum (j in 1..Jobs, m in 2..Machines) (
+        bool2int ( Execution[JobsOrder[j],m] < Execution[JobsOrder[j],m-1] + ProcessingTimes[JobsOrder[j],m-1] )
+    ) = 0;
 
 % every machine can run one job per time
 constraint
-    forall (j in 2..Jobs, m in 1..Machines) (
-        Execution[JobsOrder[j], m] >= Execution[JobsOrder[j-1], m] + ProcessingTimes[JobsOrder[j-1],m]
-    );
+    sum (j in 2..Jobs, m in 1..Machines) (
+        bool2int ( Execution[JobsOrder[j], m] < Execution[JobsOrder[j-1], m] + ProcessingTimes[JobsOrder[j-1],m] )
+    ) = 0;
 
 % a job can't start before its release date
 constraint
-    forall (j in 1..Jobs) (
-        Execution[JobsOrder[j],1] >= ReleaseDates[JobsOrder[j]]
-    );
+    sum (j in 1..Jobs) (
+        bool2int ( Execution[JobsOrder[j],1] < ReleaseDates[JobsOrder[j]] )
+    ) = 0;
 
 % OBJECTIVE FUNCTION
 constraint 
