@@ -10,15 +10,16 @@ int main(int argc, char* argv[]) {
     if (argc == 1) {
         cout << "Input file name: ";
         cin >> file_name;
+        solver = "dwgreedy";
     } else if (argc == 2) {
         file_name = argv[1];
-        solver = "wgreedy";
+        solver = "dwgreedy";
     } else if (argc == 3) {
         file_name = argv[1];
         solver = argv[2];
     } else {
         cerr << "Usage: " << argv[0] 
-            << "<input file> [solver in {wgreedy, rwgreedy, enum}]" << endl;
+            << "<input file> [solver in {wgreedy, rwgreedy, dwgreedy, drwgreedy, enum}]" << endl;
         return EXIT_FAILURE;
     }
 
@@ -35,6 +36,12 @@ int main(int argc, char* argv[]) {
     } else if (solver == "rwgreedy") {
         greedy = true;
         greedyRandomWSolver(in, out);
+    } else if (solver == "dwgreedy") {
+        greedy = true;
+        greedyDynamicWSolver(in, out);
+    } else if (solver == "drwgreedy") {
+        greedy = true;
+        greedyDynamicRandomWSolver(in, out);
     } else if (solver == "enum") {
         EnumerationFPOpt solver(in); 
         if (solver.Search()) {
