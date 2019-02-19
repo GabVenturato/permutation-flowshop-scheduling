@@ -1,14 +1,14 @@
-Fri 25 Jan 02:19:32 CET 2019
-Timeout: 1200000
+Tue 19 Feb 13:43:15 CET 2019
+Timeout: 300000
 =====UNKNOWN=====
-%%  runtime:       20:00.004 (1200004.791 ms)
-%%  solvetime:     20:00.000 (1200000.385 ms)
+%%  runtime:       5:00.014 (300014.617 ms)
+%%  solvetime:     5:00.008 (300008.151 ms)
 %%  solutions:     0
-%%  variables:     440
-%%  propagators:   538
-%%  propagations:  8716272289
-%%  nodes:         157398815
-%%  failures:      78699233
+%%  variables:     822
+%%  propagators:   544
+%%  propagations:  10068007208
+%%  nodes:         28732595
+%%  failures:      14366133
 %%  restarts:      0
-%%  peak depth:    659
+%%  peak depth:    715
 

@@ -1,0 +1,9 @@
+Tue 19 Feb 13:04:24 CET 2019
+Timeout: 300000
+=====UNKNOWN=====
+%%mzn-stat objective=1e+308
+%%mzn-stat objectiveBound=3029.554588
+%%mzn-stat nodes=0
+%%mzn-stat openNodes=-1
+%%mzn-stat time=255.3042
+

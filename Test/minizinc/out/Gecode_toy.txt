@@ -1,23 +1,14 @@
-Fri 25 Jan 05:48:40 CET 2019
-Timeout: 1200000
-EXECUTION TIMES:
-  125(  174)	  184(  229)
-    0(   26)	   27(   84)
-   30(  125)	  125(  184)
-
-
-JOBS ORDER:	[2, 3, 1]
-
-COST:	289
-----------
-%%  runtime:       20:00.001 (1200001.098 ms)
-%%  solvetime:     20:00.000 (1200000.187 ms)
-%%  solutions:     2
-%%  variables:     60
-%%  propagators:   58
-%%  propagations:  961125121
-%%  nodes:         32945700
-%%  failures:      16472843
+Tue 19 Feb 14:40:37 CET 2019
+Timeout: 300000
+=====UNKNOWN=====
+%%  runtime:       5:00.002 (300002.121 ms)
+%%  solvetime:     5:00.000 (300000.273 ms)
+%%  solutions:     0
+%%  variables:     82
+%%  propagators:   71
+%%  propagations:  3045092250
+%%  nodes:         78917485
+%%  failures:      39458734
 %%  restarts:      0
-%%  peak depth:    74
+%%  peak depth:    39
 

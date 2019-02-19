@@ -1,11 +1,11 @@
-Tue 22 Jan 17:44:08 CET 2019
-Timeout: 30000
+Tue 19 Feb 15:55:59 CET 2019
+Timeout: 300000
 %%mzn-stat objective=289
 %%mzn-stat objectiveBound=1e+308
 %%mzn-stat nodes=0
-%%mzn-stat time=0.0265
+%%mzn-stat time=0.0468
 EXECUTION TIMES:
-  125(  174)	  184(  229)
+  135(  184)	  184(  229)
     0(   26)	   26(   83)
    30(  125)	  125(  184)
 
@@ -19,5 +19,5 @@ COST:	289
 %%mzn-stat objectiveBound=289
 %%mzn-stat nodes=0
 %%mzn-stat openNodes=-1
-%%mzn-stat time=0.0265
+%%mzn-stat time=0.0468
 
