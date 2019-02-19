@@ -55,16 +55,16 @@ int main(int argc, const char* argv[]) {
   FP_mj_nhe.AddDeltaCostComponent(mj_dcc2);
 
   // runners
-  HillClimbing<FP_Input, FP_State, SwapJobs> FP_hc(in, FP_sm, FP_nhe, "SwapJobsHillClimbing");
-  SteepestDescent<FP_Input, FP_State, SwapJobs> FP_sd(in, FP_sm, FP_nhe, "SwapJobsSteepestDescent");
-  SimulatedAnnealing<FP_Input, FP_State, SwapJobs> FP_sa(in, FP_sm, FP_nhe, "SwapJobsSimulatedAnnealing");
-  TabuSearch<FP_Input, FP_State, SwapJobs> FP_ts(in, FP_sm, FP_nhe, "SwapJobsTabuSearch",
+  HillClimbing<FP_Input, FP_State, SwapJobs> FP_hc(in, FP_sm, FP_nhe, "SwapHC");
+  SteepestDescent<FP_Input, FP_State, SwapJobs> FP_sd(in, FP_sm, FP_nhe, "SwapSD");
+  SimulatedAnnealing<FP_Input, FP_State, SwapJobs> FP_sa(in, FP_sm, FP_nhe, "SwapSA");
+  TabuSearch<FP_Input, FP_State, SwapJobs> FP_ts(in, FP_sm, FP_nhe, "SwapTS",
                                                    [](const SwapJobs& m1, const SwapJobs& m2)->bool
                                                    { return m1.j1 == m2.j1 && m1.j2 == m2.j2; });
 
-  HillClimbing<FP_Input, FP_State, MoveJob> FP_mj_hc(in, FP_sm, FP_mj_nhe, "MoveJobHillClimbing");
-  SteepestDescent<FP_Input, FP_State, MoveJob> FP_mj_sd(in, FP_sm, FP_mj_nhe, "MoveJobSteepestDescent");
-  SimulatedAnnealing<FP_Input, FP_State, MoveJob> FP_mj_sa(in, FP_sm, FP_mj_nhe, "MoveJobSimulatedAnnealing");
+  HillClimbing<FP_Input, FP_State, MoveJob> FP_mj_hc(in, FP_sm, FP_mj_nhe, "MoveHC");
+  SteepestDescent<FP_Input, FP_State, MoveJob> FP_mj_sd(in, FP_sm, FP_mj_nhe, "MoveSD");
+  SimulatedAnnealing<FP_Input, FP_State, MoveJob> FP_mj_sa(in, FP_sm, FP_mj_nhe, "MoveSA");
 
   // tester
   Tester<FP_Input, FP_Output, FP_State> tester(in, FP_sm, FP_om);
@@ -80,17 +80,17 @@ int main(int argc, const char* argv[]) {
     else
       tester.RunMainMenu();
   } else {
-    if (method == string("SwapJobsSimulatedAnnealing")) {
+    if (method == string("SwapSA")) {
       FP_solver.SetRunner(FP_sa);
-    } else if (method == string("SwapJobsHillClimbing")) {
+    } else if (method == string("SwapHC")) {
       FP_solver.SetRunner(FP_hc);
-    } else if (method == string("SwapJobsSteepestDescent")) {
+    } else if (method == string("SwapSD")) {
       FP_solver.SetRunner(FP_sd);
-    } else if (method == string("SwapJobsTabuSearch")) {
+    } else if (method == string("SwapTS")) {
       FP_solver.SetRunner(FP_ts);
-    } else  if (method == string("MoveJobSimulatedAnnealing")) {
+    } else  if (method == string("MoveSA")) {
       FP_solver.SetRunner(FP_mj_sa);
-    } else if (method == string("MoveJobHillClimbing")) {
+    } else if (method == string("MoveHC")) {
       FP_solver.SetRunner(FP_mj_hc);
     } else {
       FP_solver.SetRunner(FP_mj_sd);
