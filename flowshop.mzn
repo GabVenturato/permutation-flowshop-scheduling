@@ -24,7 +24,7 @@ constraint alldifferent(JobsOrder);
 
 % first job executed ends without delays between operations
 constraint
-    Execution[JobsOrder[1],Machines] = ReleaseDates[JobsOrder[1]] + sum (m in 1..Machines) ( ProcessingTimes[JobsOrder[1],m] );
+    Execution[JobsOrder[1],Machines] = ReleaseDates[JobsOrder[1]] + sum (m in 1..Machines-1) ( ProcessingTimes[JobsOrder[1],m] );
 
 % i-th operation must start after (i-1)-th operation
 constraint
@@ -49,14 +49,11 @@ constraint
     Cost = max([Execution[JobsOrder[j],Machines] + ProcessingTimes[JobsOrder[j],Machines] | j in 1..Jobs]) + 
         sum ( j in 1..Jobs ) (
             let { var int: Diff = 
-                    if (DueDates[JobsOrder[j]] == -1) 
-                    then 0
-                    else (Execution[JobsOrder[j],Machines] + ProcessingTimes[JobsOrder[j],Machines]) - DueDates[JobsOrder[j]]
-                    endif } in
-            if ( Diff <= 0 ) 
-            then 0
-            else Diff * Weights[JobsOrder[j]]
-            endif
+                    bool2int(DueDates[JobsOrder[j]] != -1) * 
+                        (Execution[JobsOrder[j],Machines] + ProcessingTimes[JobsOrder[j],Machines]) - 
+                        DueDates[JobsOrder[j]]
+                    } in
+            bool2int(Diff>0) * Diff * Weights[JobsOrder[j]]
         );
 
 
