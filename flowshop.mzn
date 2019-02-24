@@ -22,27 +22,28 @@ var int: Cost;
 % CONSTRAINTS
 constraint alldifferent(JobsOrder);
 
-% first job executed ends without delays between operations
-constraint
-    Execution[JobsOrder[1],Machines] = ReleaseDates[JobsOrder[1]] + sum (m in 1..Machines-1) ( ProcessingTimes[JobsOrder[1],m] );
-
 % i-th operation must start after (i-1)-th operation
 constraint
-    sum (j in 1..Jobs, m in 2..Machines) (
-        bool2int ( Execution[JobsOrder[j],m] < Execution[JobsOrder[j],m-1] + ProcessingTimes[JobsOrder[j],m-1] )
-    ) = 0;
+    forall (j in 1..Jobs, m in 2..Machines) (
+        Execution[JobsOrder[j],m] >= Execution[JobsOrder[j],m-1] + ProcessingTimes[JobsOrder[j],m-1]
+    );
 
 % every machine can run one job per time
 constraint
-    sum (j in 2..Jobs, m in 1..Machines) (
-        bool2int ( Execution[JobsOrder[j], m] < Execution[JobsOrder[j-1], m] + ProcessingTimes[JobsOrder[j-1],m] )
-    ) = 0;
+    forall (j in 2..Jobs, m in 1..Machines) (
+        Execution[JobsOrder[j], m] >= Execution[JobsOrder[j-1], m] + ProcessingTimes[JobsOrder[j-1],m]
+    );
 
 % a job can't start before its release date
 constraint
-    sum (j in 1..Jobs) (
-        bool2int ( Execution[JobsOrder[j],1] < ReleaseDates[JobsOrder[j]] )
-    ) = 0;
+    forall (j in 1..Jobs) (
+        Execution[JobsOrder[j],1] >= ReleaseDates[JobsOrder[j]]
+    );
+
+% first job executed ends without delays between operations
+constraint
+    Execution[JobsOrder[1],Machines] = ReleaseDates[JobsOrder[1]] + 
+        sum (m in 1..Machines-1) ( ProcessingTimes[JobsOrder[1],m] );
 
 % OBJECTIVE FUNCTION
 constraint 
@@ -52,13 +53,16 @@ constraint
                     bool2int(DueDates[JobsOrder[j]] != -1) * 
                         (Execution[JobsOrder[j],Machines] + ProcessingTimes[JobsOrder[j],Machines]) - 
                         DueDates[JobsOrder[j]]
-                    } in
-            bool2int(Diff>0) * Diff * Weights[JobsOrder[j]]
+            } in bool2int(Diff>0) * Diff * Weights[JobsOrder[j]]
         );
 
-
+% SOLVE
 % solve minimize Cost;
-solve :: int_search( [ Execution[j,m] | j in 1..Jobs, m in 1..Machines], first_fail, indomain_min, complete )
+
+% solve :: int_search( [ Execution[j,m] | j in 1..Jobs, m in 1..Machines], first_fail, indomain_min, complete )
+%     minimize Cost;
+
+solve :: int_search( JobsOrder, first_fail, indomain_median, complete )
     minimize Cost;
 
 % OUTPUT
