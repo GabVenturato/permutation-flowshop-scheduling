@@ -25,7 +25,7 @@ constraint alldifferent(JobsOrder);
 % i-th operation must start after (i-1)-th operation
 constraint
     forall (j in 1..Jobs, m in 2..Machines) (
-        Execution[JobsOrder[j],m] >= Execution[JobsOrder[j],m-1] + ProcessingTimes[JobsOrder[j],m-1]
+        Execution[j,m] >= Execution[j,m-1] + ProcessingTimes[j,m-1]
     );
 
 % every machine can run one job per time
@@ -37,23 +37,21 @@ constraint
 % a job can't start before its release date
 constraint
     forall (j in 1..Jobs) (
-        Execution[JobsOrder[j],1] >= ReleaseDates[JobsOrder[j]]
+        Execution[j,1] >= ReleaseDates[j]
     );
 
 % first job executed ends without delays between operations
 constraint
-    Execution[JobsOrder[1],Machines] = ReleaseDates[JobsOrder[1]] + 
+    Execution[JobsOrder[1],Machines] = ReleaseDates[JobsOrder[1]] +
         sum (m in 1..Machines-1) ( ProcessingTimes[JobsOrder[1],m] );
 
 % OBJECTIVE FUNCTION
-constraint 
-    Cost = max([Execution[JobsOrder[j],Machines] + ProcessingTimes[JobsOrder[j],Machines] | j in 1..Jobs]) + 
-        sum ( j in 1..Jobs ) (
-            let { var int: Diff = 
-                    bool2int(DueDates[JobsOrder[j]] != -1) * 
-                        (Execution[JobsOrder[j],Machines] + ProcessingTimes[JobsOrder[j],Machines]) - 
-                        DueDates[JobsOrder[j]]
-            } in bool2int(Diff>0) * Diff * Weights[JobsOrder[j]]
+constraint
+    Cost = max([Execution[j,Machines] + ProcessingTimes[j,Machines] | j in 1..Jobs]) +
+        sum ( j in 1..Jobs where DueDates[j] != -1 ) (
+            let { 
+                var int: Diff = (Execution[j,Machines] + ProcessingTimes[j,Machines]) - DueDates[j] 
+            } in bool2int(Diff>0) * Diff * Weights[j]
         );
 
 % SOLVE
@@ -68,7 +66,7 @@ solve :: int_search( JobsOrder, first_fail, indomain_median, complete )
 % OUTPUT
 output
     ["EXECUTION TIMES:\n"] ++
-    [if ( m == Machines ) 
+    [if ( m == Machines )
         then show_int(5,Execution[j,m]) ++ "(" ++ show_int(5,Execution[j,m]+ProcessingTimes[j,m]) ++ ")\n"
         else show_int(5,Execution[j,m]) ++ "(" ++ show_int(5,Execution[j,m]+ProcessingTimes[j,m]) ++ ")\t"
     endif | j in 1..Jobs, m in 1..Machines ]
